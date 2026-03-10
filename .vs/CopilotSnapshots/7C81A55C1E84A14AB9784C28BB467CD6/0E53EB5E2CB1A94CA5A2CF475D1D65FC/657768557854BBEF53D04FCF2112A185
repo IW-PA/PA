@@ -1,0 +1,80 @@
+﻿<?php
+// Ultra simple diagnostic - no dependencies
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+echo "<h1>🔧 Simple PHP Test</h1>";
+echo "<p><strong>PHP Version:</strong> " . PHP_VERSION . "</p>";
+
+// Test 1: Basic PHP
+echo "<p>✅ PHP is working!</p>";
+
+// Test 2: Check extensions
+echo "<h2>PHP Extensions:</h2>";
+$extensions = ['pdo', 'pdo_mysql', 'mbstring', 'json'];
+foreach ($extensions as $ext) {
+    $loaded = extension_loaded($ext);
+    echo "<p>" . ($loaded ? "✅" : "❌") . " <strong>$ext:</strong> " . ($loaded ? "Loaded" : "NOT loaded") . "</p>";
+}
+
+// Test 3: Check paths
+echo "<h2>File Paths:</h2>";
+echo "<p><strong>Current file:</strong> " . __FILE__ . "</p>";
+echo "<p><strong>Directory:</strong> " . __DIR__ . "</p>";
+
+$configPath = __DIR__ . '/src/config/config.php';
+echo "<p><strong>Config file exists?</strong> " . (file_exists($configPath) ? "✅ Yes" : "❌ No") . "</p>";
+if (file_exists($configPath)) {
+    echo "<p><strong>Config path:</strong> " . $configPath . "</p>";
+}
+
+// Test 4: Try to load config (catch errors)
+echo "<h2>Database Test:</h2>";
+try {
+    if (file_exists($configPath)) {
+        require_once $configPath;
+        echo "<p>✅ Config loaded successfully</p>";
+        
+        // Try database connection
+        try {
+            $db = getDB();
+            echo "<p>✅ <strong>Database connected!</strong></p>";
+            echo "<p>Host: " . DB_HOST . " | Database: " . DB_NAME . " | User: " . DB_USER . "</p>";
+            
+            // Count users
+            $result = $db->query("SELECT COUNT(*) as count FROM users");
+            $count = $result->fetch();
+            echo "<p>✅ <strong>Users in database:</strong> " . $count['count'] . "</p>";
+            
+        } catch (Exception $e) {
+            echo "<p>❌ <strong>Database Error:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+            echo "<p><strong>Fix:</strong> Check that MySQL is running and budgie_db exists</p>";
+        }
+    } else {
+        echo "<p>❌ Config file not found at: $configPath</p>";
+    }
+} catch (Exception $e) {
+    echo "<p>❌ <strong>Error loading config:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "<p><strong>Error details:</strong></p>";
+    echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+}
+
+// Test 5: Next steps
+echo "<h2>🚀 Next Steps:</h2>";
+echo "<p>If all above tests passed, try accessing:</p>";
+echo "<ul>";
+echo "<li><a href='index.php'>index.php (Home)</a></li>";
+echo "<li><a href='public/login.php'>public/login.php (Login)</a></li>";
+echo "<li><a href='public/signup.php'>public/signup.php (Signup)</a></li>";
+echo "</ul>";
+
+echo "<h2>📁 Project Structure Check:</h2>";
+$folders = ['src', 'src/config', 'src/services', 'public', 'public/css', 'public/js', 'database'];
+foreach ($folders as $folder) {
+    $path = __DIR__ . '/' . $folder;
+    $exists = is_dir($path);
+    echo "<p>" . ($exists ? "✅" : "❌") . " <strong>$folder/</strong> " . ($exists ? "exists" : "NOT found") . "</p>";
+}
+
+echo "<hr>";
+echo "<p><em>Diagnostic complete. If you see errors above, copy them and let me know!</em></p>";

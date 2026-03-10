@@ -1,0 +1,15 @@
+﻿<?php
+// Entry point redirect for WAMP/Apache
+// Redirects to login if not authenticated, otherwise to dashboard
+
+session_start();
+
+// Check if user is logged in
+if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+    // User is logged in, redirect to dashboard
+    header('Location: public/index.php');
+} else {
+    // User is not logged in, redirect to login page
+    header('Location: public/login.php');
+}
+exit();

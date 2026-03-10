@@ -1,0 +1,216 @@
+﻿<?php
+/**
+ * Quick diagnostic page for WAMP setup
+ * Access at: http://localhost/PA/test.php
+ */
+
+// Suppress errors initially
+error_reporting(0);
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Budgie - Test Configuration</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        h1 { color: #2563eb; }
+        .test {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #cbd5e1;
+        }
+        .success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .result { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🐦 Budgie - Test de Configuration WAMP</h1>
+    <p>Cette page vérifie que votre installation est correcte.</p>
+
+    <?php
+    $errors = [];
+    $warnings = [];
+    $successes = [];
+
+    // Test 1: PHP Version
+    echo '<div class="test ' . (version_compare(PHP_VERSION, '8.0.0', '>=') ? 'success' : 'error') . '">';
+    echo '<strong>✓ PHP Version:</strong> ' . PHP_VERSION;
+    if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+        echo ' <span style="color: #ef4444;">❌ Minimum requis: PHP 8.0</span>';
+        $errors[] = 'PHP version trop ancienne';
+    } else {
+        $successes[] = 'PHP version OK';
+    }
+    echo '</div>';
+
+    // Test 2: Extensions PHP
+    $required_extensions = ['pdo', 'pdo_mysql', 'mbstring', 'json'];
+    foreach ($required_extensions as $ext) {
+        echo '<div class="test ' . (extension_loaded($ext) ? 'success' : 'error') . '">';
+        echo '<strong>' . ($extension_loaded($ext) ? '✓' : '✗') . ' Extension PHP:</strong> ' . $ext;
+        if (!extension_loaded($ext)) {
+            echo ' <span style="color: #ef4444;">❌ Manquante</span>';
+            $errors[] = "Extension $ext manquante";
+        } else {
+            $successes[] = "Extension $ext OK";
+        }
+        echo '</div>';
+    }
+
+    // Test 3: Config file
+    $configFile = __DIR__ . '/src/config/config.php';
+    echo '<div class="test ' . (file_exists($configFile) ? 'success' : 'error') . '">';
+    echo '<strong>' . (file_exists($configFile) ? '✓' : '✗') . ' Fichier config.php:</strong> ';
+    if (file_exists($configFile)) {
+        echo '<code>' . $configFile . '</code>';
+        $successes[] = 'Fichier config trouvé';
+    } else {
+        echo 'Fichier manquant !';
+        $errors[] = 'config.php introuvable';
+    }
+    echo '</div>';
+
+    // Test 4: Database connection
+    echo '<div class="test ';
+    try {
+        require_once $configFile;
+        $db = getDB();
+        echo 'success">';
+        echo '<strong>✓ Connexion Base de Données:</strong> Réussie';
+        echo '<br><small>Host: ' . DB_HOST . ' | Database: ' . DB_NAME . ' | User: ' . DB_USER . '</small>';
+        $successes[] = 'Connexion DB OK';
+        
+        // Test 5: Check tables
+        echo '</div><div class="test ';
+        $tables = ['users', 'accounts', 'expenses', 'incomes', 'exceptions'];
+        $missingTables = [];
+        foreach ($tables as $table) {
+            $result = $db->query("SHOW TABLES LIKE '$table'");
+            if ($result->rowCount() == 0) {
+                $missingTables[] = $table;
+            }
+        }
+        
+        if (empty($missingTables)) {
+            echo 'success">';
+            echo '<strong>✓ Tables de la Base:</strong> Toutes présentes (' . count($tables) . ' tables)';
+            $successes[] = 'Tables DB OK';
+        } else {
+            echo 'warning">';
+            echo '<strong>⚠ Tables de la Base:</strong> Tables manquantes : ' . implode(', ', $missingTables);
+            echo '<br><small>💡 Importez <code>database/schema.sql</code> dans phpMyAdmin</small>';
+            $warnings[] = 'Tables manquantes - importer schema.sql';
+        }
+        
+    } catch (Exception $e) {
+        echo 'error">';
+        echo '<strong>✗ Connexion Base de Données:</strong> Échec';
+        echo '<br><span style="color: #ef4444;">Erreur: ' . htmlspecialchars($e->getMessage()) . '</span>';
+        echo '<br><br><strong>Solutions possibles:</strong>';
+        echo '<ol>';
+        echo '<li>Vérifiez que MySQL est démarré dans WAMP (icône verte)</li>';
+        echo '<li>Créez la base de données <code>budgie_db</code> dans phpMyAdmin</li>';
+        echo '<li>Vérifiez les identifiants dans <code>src/config/config.php</code></li>';
+        echo '</ol>';
+        $errors[] = 'Connexion DB échouée';
+    }
+    echo '</div>';
+
+    // Test 6: Write permissions
+    $uploadDir = __DIR__ . '/public/uploads';
+    echo '<div class="test ' . (is_writable($uploadDir) || !file_exists($uploadDir) ? 'success' : 'warning') . '">';
+    if (file_exists($uploadDir)) {
+        echo '<strong>' . (is_writable($uploadDir) ? '✓' : '⚠') . ' Permissions Écriture:</strong> ';
+        echo is_writable($uploadDir) ? 'OK' : 'Lecture seule (peut causer des problèmes)';
+    } else {
+        echo '<strong>⚠ Dossier uploads:</strong> N\'existe pas encore (sera créé automatiquement)';
+    }
+    echo '</div>';
+
+    // Test 7: Sessions
+    echo '<div class="test ' . (session_status() === PHP_SESSION_ACTIVE ? 'success' : 'warning') . '">';
+    echo '<strong>' . (session_status() === PHP_SESSION_ACTIVE ? '✓' : '⚠') . ' Sessions PHP:</strong> ';
+    echo session_status() === PHP_SESSION_ACTIVE ? 'Actives' : 'Inactives';
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        $successes[] = 'Sessions OK';
+    }
+    echo '</div>';
+
+    // Test 8: mod_rewrite
+    echo '<div class="test ' . (function_exists('apache_get_modules') && in_array('mod_rewrite', apache_get_modules()) ? 'success' : 'warning') . '">';
+    if (function_exists('apache_get_modules')) {
+        $hasRewrite = in_array('mod_rewrite', apache_get_modules());
+        echo '<strong>' . ($hasRewrite ? '✓' : '⚠') . ' Apache mod_rewrite:</strong> ';
+        echo $hasRewrite ? 'Activé' : 'Non détecté (peut causer des problèmes de routing)';
+        if ($hasRewrite) {
+            $successes[] = 'mod_rewrite OK';
+        } else {
+            $warnings[] = 'mod_rewrite à vérifier';
+        }
+    } else {
+        echo '<strong>⚠ Apache mod_rewrite:</strong> Impossible à détecter (fonction apache_get_modules non disponible)';
+    }
+    echo '</div>';
+
+    // Summary
+    echo '<div style="background: white; padding: 20px; margin-top: 20px; border-radius: 8px;">';
+    echo '<h2>📊 Résumé</h2>';
+    echo '<p><strong style="color: #10b981;">✓ Succès:</strong> ' . count($successes) . '</p>';
+    echo '<p><strong style="color: #f59e0b;">⚠ Avertissements:</strong> ' . count($warnings) . '</p>';
+    echo '<p><strong style="color: #ef4444;">✗ Erreurs:</strong> ' . count($errors) . '</p>';
+    
+    if (empty($errors) && count($warnings) <= 1) {
+        echo '<hr>';
+        echo '<p style="font-size: 1.2em; color: #10b981;"><strong>🎉 Installation réussie !</strong></p>';
+        echo '<p>Vous pouvez maintenant accéder à l\'application :</p>';
+        echo '<ul>';
+        echo '<li><a href="index.php" style="color: #2563eb;">Page d\'accueil</a></li>';
+        echo '<li><a href="public/login.php" style="color: #2563eb;">Page de connexion</a></li>';
+        echo '<li><a href="public/signup.php" style="color: #2563eb;">Page d\'inscription</a></li>';
+        echo '</ul>';
+    } else {
+        echo '<hr>';
+        echo '<p style="color: #ef4444;"><strong>⚠️ Problèmes détectés</strong></p>';
+        echo '<p>Veuillez résoudre les erreurs ci-dessus avant d\'utiliser l\'application.</p>';
+        echo '<p><strong>Consultez le guide:</strong> <code>WAMP_SETUP.md</code></p>';
+    }
+    echo '</div>';
+    ?>
+
+    <div style="background: #f1f5f9; padding: 15px; margin-top: 20px; border-radius: 8px; font-size: 0.9em;">
+        <strong>📚 Ressources :</strong>
+        <ul>
+            <li><a href="WAMP_SETUP.md">Guide d'installation WAMP</a></li>
+            <li><a href="http://localhost/phpmyadmin" target="_blank">phpMyAdmin</a></li>
+            <li><a href="README.md">Documentation complète</a></li>
+        </ul>
+    </div>
+</body>
+</html>

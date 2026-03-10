@@ -1,0 +1,33 @@
+# Budgie Root .htaccess
+# Redirects all requests to the public folder or root index.php
+
+# Enable rewrite engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /PA/
+    
+    # Redirect root to index.php (which then redirects to login/dashboard)
+    DirectoryIndex index.php
+    
+    # Block access to sensitive files
+    <FilesMatch "^\.">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+    
+    # Block access to config files
+    <FilesMatch "(\.env|composer\.json|composer\.lock|package\.json)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# PHP Security Settings
+<IfModule mod_php8.c>
+    php_flag display_errors Off
+    php_flag log_errors On
+    php_value error_log logs/php_error.log
+</IfModule>

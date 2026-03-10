@@ -1,0 +1,10 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Apache Test</title>
+</head>
+<body>
+    <h1>✅ Apache is Working!</h1>
+    <p>If you see this, Apache is fine. The problem is with PHP or .htaccess</p>
+</body>
+</html>

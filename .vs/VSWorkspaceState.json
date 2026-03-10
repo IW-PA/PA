@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\public",
+    "\\public\\actions",
+    "\\public\\auth",
+    "\\public\\css",
+    "\\public\\js",
+    "\\src",
+    "\\src\\includes",
+    "\\src\\security",
+    "\\src\\services"
+  ],
+  "PreviewInSolutionExplorer": false
+}

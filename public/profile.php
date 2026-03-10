@@ -1,0 +1,204 @@
+<?php
+require_once __DIR__ . '/../src/config/config.php';
+requireLogin();
+$page_title = 'Profil';
+include SRC_PATH . '/includes/header.php';
+
+// Get real user data
+$user = getCurrentUser();
+if (!$user) {
+    redirect('login.php');
+}
+
+// Get last login info
+$lastLoginInfo = fetchOne(
+    "SELECT last_login FROM users WHERE id = ?",
+    [$_SESSION['user_id']]
+);
+
+// Count actual resources
+$accountsCount = fetchOne("SELECT COUNT(*) as count FROM accounts WHERE user_id = ?", [$_SESSION['user_id']])['count'];
+$expensesCount = fetchOne("SELECT COUNT(*) as count FROM expenses WHERE user_id = ?", [$_SESSION['user_id']])['count'];
+$incomesCount = fetchOne("SELECT COUNT(*) as count FROM incomes WHERE user_id = ?", [$_SESSION['user_id']])['count'];
+
+$user_data = [
+    'first_name' => $user['first_name'],
+    'last_name' => $user['last_name'],
+    'email' => $user['email'],
+    'subscription' => $user['subscription_type'] === 'premium' ? 'Premium' : 'Gratuit',
+    'accounts_limit' => $user['subscription_type'] === 'premium' ? 'Illimité' : FREE_ACCOUNTS_LIMIT,
+    'expenses_limit' => $user['subscription_type'] === 'premium' ? 'Illimité' : FREE_EXPENSES_LIMIT,
+    'incomes_limit' => $user['subscription_type'] === 'premium' ? 'Illimité' : FREE_INCOMES_LIMIT,
+    'last_login' => $lastLoginInfo['last_login'] ?? 'Jamais',
+    'accounts_count' => $accountsCount,
+    'expenses_count' => $expensesCount,
+    'incomes_count' => $incomesCount,
+];
+?>
+
+<div class="container">
+    <!-- User Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Informations Personnelles</h3>
+        </div>
+        <form method="POST" action="actions/update_profile.php">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="form-group">
+                    <label for="first_name" class="form-label">Prénom</label>
+                    <input type="text" id="first_name" name="first_name" class="form-input" value="<?php echo htmlspecialchars($user_data['first_name']); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name" class="form-label">Nom</label>
+                    <input type="text" id="last_name" name="last_name" class="form-input" value="<?php echo htmlspecialchars($user_data['last_name']); ?>" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-input" value="<?php echo htmlspecialchars($user_data['email']); ?>" required>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <span>💾</span> Mettre à jour
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Changer le Mot de Passe</h3>
+        </div>
+        <form method="POST" action="actions/change_password.php">
+            <div class="form-group">
+                <label for="current_password" class="form-label">Mot de passe actuel</label>
+                <input type="password" id="current_password" name="current_password" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password" class="form-label">Nouveau mot de passe</label>
+                <input type="password" id="new_password" name="new_password" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_new_password" class="form-label">Confirmer le nouveau mot de passe</label>
+                <input type="password" id="confirm_new_password" name="confirm_new_password" class="form-input" required>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <span>🔒</span> Changer le mot de passe
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Subscription Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Abonnement Actuel</h3>
+            <a href="subscriptions.php" class="btn btn-secondary">
+                <span>⭐</span> Gérer l'abonnement
+            </a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['subscription']; ?></div>
+                <div class="stat-label">Plan Actuel</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['accounts_limit']; ?></div>
+                <div class="stat-label">Comptes Autorisés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['expenses_limit']; ?></div>
+                <div class="stat-label">Dépenses par Compte</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['incomes_limit']; ?></div>
+                <div class="stat-label">Revenus par Compte</div>
+            </div>
+        </div>
+        
+        <?php if ($user_data['subscription'] === 'Gratuit'): ?>
+        <div style="margin-top: 1.5rem; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
+            <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🚀 Passez au plan Payant</h4>
+            <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                Débloquez toutes les fonctionnalités avec un abonnement illimité !
+            </p>
+            <a href="subscriptions.php" class="btn btn-primary">
+                <span>⭐</span> Voir les Plans
+            </a>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Account Statistics -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Statistiques du Compte</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['accounts_count']; ?></div>
+                <div class="stat-label">Comptes Créés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['expenses_count']; ?></div>
+                <div class="stat-label">Dépenses Actives</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['incomes_count']; ?></div>
+                <div class="stat-label">Revenus Actifs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $user_data['last_login'] !== 'Jamais' ? formatDate($user_data['last_login'], 'd/m/Y H:i') : 'Première connexion'; ?></div>
+                <div class="stat-label">Dernière Connexion</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity & Security -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Activité & Sécurité</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            <div>
+                <h4>🔍 Activité Récente</h4>
+                <p style="color: var(--gray-600); margin-bottom: 0.5rem;">
+                    <strong>Dernière connexion :</strong><br>
+                    <?php echo $user_data['last_login'] !== 'Jamais' ? formatDate($user_data['last_login'], 'd/m/Y à H:i') : 'Première connexion'; ?>
+                </p>
+                <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                    <strong>Adresse IP :</strong> <?php echo $_SERVER['REMOTE_ADDR'] ?? 'N/A'; ?>
+                </p>
+            </div>
+            <div>
+                <h4>🛡️ Sessions Actives</h4>
+                <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                    Gérez les sessions actives sur vos différents appareils.
+                </p>
+                <button class="btn btn-secondary" onclick="alert('Vous pouvez voir toutes vos sessions actives et les révoquer si nécessaire.')">
+                    <span>👁️</span> Voir les Sessions
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card" style="border: 2px solid var(--danger-color);">
+        <div class="card-header">
+            <h3 class="card-title" style="color: var(--danger-color);">Zone de Danger</h3>
+        </div>
+        <div>
+            <h4 style="color: var(--danger-color); margin-bottom: 0.5rem;">🗑️ Supprimer le Compte</h4>
+            <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+            </p>
+            <button class="btn btn-danger" onclick="if(confirm('Êtes-vous ABSOLUMENT sûr de vouloir supprimer votre compte ? Cette action est irréversible !')) { alert('Fonctionnalité à venir'); }">
+                <span>🗑️</span> Supprimer le Compte
+            </button>
+        </div>
+    </div>
+</div>
+
+<?php include SRC_PATH . '/includes/footer.php'; ?>

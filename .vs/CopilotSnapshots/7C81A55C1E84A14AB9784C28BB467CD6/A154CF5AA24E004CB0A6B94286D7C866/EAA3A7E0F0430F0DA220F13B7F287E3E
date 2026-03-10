@@ -1,0 +1,28 @@
+﻿<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__ . '/src/config/config.php';
+
+$host = DB_HOST ?? '127.0.0.1';
+$port = DB_PORT ?? '3306';
+$dbname = DB_NAME ?? 'budgie_db';
+$user = DB_USER ?? 'root';
+$pass = DB_PASS ?? '';
+
+echo "<h1>DB Debug</h1>";
+echo "<p>Connecting to {$host}:{$port} DB={$dbname} as {$user}</p>";
+
+$dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
+
+try {
+    $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    echo "<p style='color:green;'>Connection successful.</p>";
+    $stmt = $pdo->query("SELECT COUNT(*) as c FROM users");
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo "<p>Users: " . ($row['c'] ?? '0') . "</p>";
+} catch (PDOException $e) {
+    echo "<p style='color:red;'><strong>PDOException:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+}
+
+?>

@@ -1,0 +1,4 @@
+﻿<?php
+// When the server root points to the project root, redirect visitors to the real app entry point.
+header('Location: public/index.php');
+exit();
