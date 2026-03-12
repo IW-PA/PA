@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../src/config/config.php';
 requireLogin();
-$page_title = 'Dépenses';
+$page_title = 'Expenses';
 include SRC_PATH . '/includes/header.php';
 
 // Dummy data for expenses
@@ -52,35 +52,35 @@ $expenses = [
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Mes Dépenses</h3>
+            <h3 class="card-title"><?php e('expenses.title'); ?></h3>
             <button class="btn btn-primary" onclick="openModal('addExpenseModal')">
-                <span>➕</span> Ajouter une Dépense
+                <span>+</span> <?php e('expenses.add_expense'); ?>
             </button>
         </div>
 
         <!-- Filters -->
         <div class="filters">
             <div class="filter-group">
-                <label for="search_expenses" class="form-label">Rechercher</label>
-                <input type="text" id="search_expenses" class="filter-input" placeholder="Nom ou description...">
+                <label for="search_expenses" class="form-label"><?php e('common.search'); ?></label>
+                <input type="text" id="search_expenses" class="filter-input" placeholder="<?php echo t('common.name'); ?> <?php e('common.description'); ?>...">
             </div>
             <div class="filter-group">
-                <label for="filter_account" class="form-label">Compte</label>
+                <label for="filter_account" class="form-label"><?php e('expenses.account'); ?></label>
                 <select id="filter_account" class="filter-input">
-                    <option value="">Tous les comptes</option>
+                    <option value=""><?php e('expenses.select_account'); ?></option>
                     <option value="Compte Courant">Compte Courant</option>
                     <option value="Livret A">Livret A</option>
                     <option value="CTO">CTO</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label for="filter_frequency" class="form-label">Fréquence</label>
+                <label for="filter_frequency" class="form-label"><?php e('expenses.frequency'); ?></label>
                 <select id="filter_frequency" class="filter-input">
-                    <option value="">Toutes les fréquences</option>
-                    <option value="Ponctuel">Ponctuel</option>
-                    <option value="Mensuel">Mensuel</option>
-                    <option value="Hebdomadaire">Hebdomadaire</option>
-                    <option value="Bi-mensuel">Bi-mensuel</option>
+                    <option value=""><?php e('expenses.select_frequency'); ?></option>
+                    <option value="Ponctuel"><?php e('expenses.frequencies.one_time'); ?></option>
+                    <option value="Mensuel"><?php e('expenses.frequencies.monthly'); ?></option>
+                    <option value="Hebdomadaire"><?php e('expenses.frequencies.weekly'); ?></option>
+                    <option value="Bi-mensuel">Bi-<?php e('expenses.frequencies.monthly'); ?></option>
                 </select>
             </div>
         </div>
@@ -90,14 +90,14 @@ $expenses = [
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nom</th>
-                        <th>Description</th>
-                        <th>Compte</th>
-                        <th>Montant</th>
-                        <th>Fréquence</th>
-                        <th>Date Début</th>
-                        <th>Date Fin</th>
-                        <th>Actions</th>
+                        <th><?php e('common.name'); ?></th>
+                        <th><?php e('common.description'); ?></th>
+                        <th><?php e('expenses.account'); ?></th>
+                        <th><?php e('common.amount'); ?></th>
+                        <th><?php e('expenses.frequency'); ?></th>
+                        <th><?php e('expenses.start_date'); ?></th>
+                        <th><?php e('expenses.end_date'); ?></th>
+                        <th><?php e('common.actions'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,11 +112,11 @@ $expenses = [
                         <td><?php echo date('d/m/Y', strtotime($expense['start_date'])); ?></td>
                         <td><?php echo $expense['end_date'] ? date('d/m/Y', strtotime($expense['end_date'])) : 'N/A'; ?></td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="openModal('editExpenseModal')">
-                                <span>✏️</span> Modifier
+                            <button class="btn btn-sm btn-secondary" onclick="openModal('editExpenseModal')" title="<?php e('common.edit'); ?>">
+                                <span>✎</span>
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) { /* Delete logic */ }">
-                                <span>🗑️</span> Supprimer
+                            <button class="btn btn-sm btn-danger" onclick="if(confirm('<?php e('messages.delete_confirm'); ?>')) { /* Delete logic */ }" title="<?php e('common.delete'); ?>">
+                                <span>✕</span>
                             </button>
                         </td>
                     </tr>

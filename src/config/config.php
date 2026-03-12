@@ -21,6 +21,9 @@ define('SECRET_KEY', $_ENV['SECRET_KEY'] ?? 'your-secret-key-change-this-in-prod
 define('SESSION_LIFETIME', 3600 * 24 * 7); // 7 days
 define('PASSWORD_MIN_LENGTH', 8);
 
+// Load language helper
+require_once SRC_PATH . '/helpers/language.php';
+
 // Database settings
 // WAMP defaults: user=root, password=empty
 if (!defined('DB_HOST')) {
@@ -112,21 +115,26 @@ function requireLogin() {
 
 function requireAdmin() {
     requireLogin();
-    if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-        redirect('index.php');
-    }
+    require_once SRC_PATH . '/middleware/AdminGuard.php';
+    AdminGuard::requireAdmin();
 }
 
 function getCurrentUser() {
     if (!isLoggedIn()) {
         return null;
     }
-    
+
     $user = fetchOne(
-        "SELECT id, first_name, last_name, email, subscription_type FROM users WHERE id = ?",
+        "SELECT id, first_name, last_name, email, subscription_type, role, status FROM users WHERE id = ?",
         [$_SESSION['user_id']]
     );
-    
+
+    // Update session with current role and status
+    if ($user) {
+        $_SESSION['user_role'] = $user['role'];
+        $_SESSION['user_status'] = $user['status'];
+    }
+
     return $user;
 }
 
