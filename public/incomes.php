@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../src/config/config.php';
 requireLogin();
-$page_title = 'Incomes';
+$page_title = 'Revenus';
 include SRC_PATH . '/includes/header.php';
 
 // Dummy data for incomes
@@ -52,34 +52,34 @@ $incomes = [
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title"><?php e('incomes.title'); ?></h3>
-            <button class="btn btn-primary" onclick="openModal('addIncomeModal')" title="<?php e('incomes.add_income'); ?>">
-                <span>+</span>
+            <h3 class="card-title">Mes Revenus</h3>
+            <button class="btn btn-primary" onclick="openModal('addIncomeModal')">
+                <span>➕</span> Ajouter un Revenu
             </button>
         </div>
 
         <!-- Filters -->
         <div class="filters">
             <div class="filter-group">
-                <label for="search_incomes" class="form-label"><?php e('common.search'); ?></label>
-                <input type="text" id="search_incomes" class="filter-input" placeholder="<?php e('incomes.income_name'); ?>...">
+                <label for="search_incomes" class="form-label">Rechercher</label>
+                <input type="text" id="search_incomes" class="filter-input" placeholder="Nom ou description...">
             </div>
             <div class="filter-group">
-                <label for="filter_account_income" class="form-label"><?php e('incomes.account'); ?></label>
+                <label for="filter_account_income" class="form-label">Compte</label>
                 <select id="filter_account_income" class="filter-input">
-                    <option value=""><?php e('expenses.select_account'); ?></option>
-                    <option value="Compte Courant"><?php e('dashboard.current_account'); ?></option>
+                    <option value="">Tous les comptes</option>
+                    <option value="Compte Courant">Compte Courant</option>
                     <option value="Livret A">Livret A</option>
                     <option value="CTO">CTO</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label for="filter_frequency_income" class="form-label"><?php e('incomes.frequency'); ?></label>
+                <label for="filter_frequency_income" class="form-label">Fréquence</label>
                 <select id="filter_frequency_income" class="filter-input">
-                    <option value=""><?php e('expenses.select_frequency'); ?></option>
-                    <option value="Ponctuel"><?php e('expenses.frequencies.one_time'); ?></option>
-                    <option value="Mensuel"><?php e('expenses.frequencies.monthly'); ?></option>
-                    <option value="Annuel"><?php e('expenses.frequencies.yearly'); ?></option>
+                    <option value="">Toutes les fréquences</option>
+                    <option value="Ponctuel">Ponctuel</option>
+                    <option value="Mensuel">Mensuel</option>
+                    <option value="Annuel">Annuel</option>
                 </select>
             </div>
         </div>
@@ -89,14 +89,14 @@ $incomes = [
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th><?php e('common.name'); ?></th>
-                        <th><?php e('common.description'); ?></th>
-                        <th><?php e('incomes.account'); ?></th>
-                        <th><?php e('common.amount'); ?></th>
-                        <th><?php e('incomes.frequency'); ?></th>
-                        <th><?php e('incomes.start_date'); ?></th>
-                        <th><?php e('incomes.end_date'); ?></th>
-                        <th><?php e('common.actions'); ?></th>
+                        <th>Nom</th>
+                        <th>Description</th>
+                        <th>Compte</th>
+                        <th>Montant</th>
+                        <th>Fréquence</th>
+                        <th>Date Début</th>
+                        <th>Date Fin</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -111,11 +111,11 @@ $incomes = [
                         <td><?php echo date('d/m/Y', strtotime($income['start_date'])); ?></td>
                         <td><?php echo $income['end_date'] ? date('d/m/Y', strtotime($income['end_date'])) : 'N/A'; ?></td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="openModal('editIncomeModal')" title="<?php e('common.edit'); ?>">
-                                <span>✎</span>
+                            <button class="btn btn-sm btn-secondary" onclick="openModal('editIncomeModal')">
+                                <span>✏️</span> Modifier
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="if(confirm('<?php e('incomes.delete_confirm'); ?>')) { /* Delete logic */ }" title="<?php e('common.delete'); ?>">
-                                <span>✕</span>
+                            <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer ce revenu ?')) { /* Delete logic */ }">
+                                <span>🗑️</span> Supprimer
                             </button>
                         </td>
                     </tr>
