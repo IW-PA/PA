@@ -29,7 +29,7 @@ if (!checkRateLimit("login_{$email}")) {
 try {
     // Get user from database
     $user = fetchOne(
-        "SELECT id, first_name, last_name, email, password_hash, subscription_type, status FROM users WHERE email = ?",
+        "SELECT id, first_name, last_name, email, password_hash, subscription_type, role, status FROM users WHERE email = ?",
         [$email]
     );
 
@@ -63,13 +63,8 @@ if (!verifyPassword($password, $user['password_hash'])) {
     $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['user_subscription'] = $user['subscription_type'];
-    
-    // Check if user is admin (simple check for demo)
-    if ($user['email'] === 'admin@budgie.com') {
-        $_SESSION['user_role'] = 'admin';
-    } else {
-        $_SESSION['user_role'] = 'user';
-    }
+    $_SESSION['user_role'] = $user['role'] ?? 'user';
+    $_SESSION['user_status'] = $user['status'] ?? 'active';
 
     // Generate new session token
     $sessionToken = generateToken();
