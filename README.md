@@ -2,7 +2,7 @@
 
 Budgie is a modern, minimal personal finance web application built with pure PHP, HTML, CSS, and JavaScript. It helps users track their expenses, manage accounts, and plan their financial future without requiring bank connections.
 
-## 🚀 Features
+## Features
 
 ### Core Functionality
 - **User Authentication**: Secure login and registration system
@@ -19,7 +19,7 @@ Budgie is a modern, minimal personal finance web application built with pure PHP
 - **Admin Panel**: User management and system administration
 - **Responsive Design**: Mobile-friendly interface
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 budgie/
@@ -42,7 +42,7 @@ budgie/
 └── README, deploy scripts, env files, etc.
 ```
 
-## 🎨 Design Features
+## Design Features
 
 - **Modern UI**: Clean, minimal design with consistent color scheme
 - **Responsive Layout**: Works on desktop, tablet, and mobile devices
@@ -51,7 +51,7 @@ budgie/
 - **Filtering**: Search and filter functionality for data tables
 - **Card-based Layout**: Organized information display
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Backend**: PHP 8.2+
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
@@ -59,7 +59,7 @@ budgie/
 - **Styling**: Custom CSS with CSS Grid and Flexbox
 - **Icons**: Emoji-based icons for simplicity
 
-## 📱 Pages Overview
+## Pages Overview
 
 ### Authentication
 - **Login**: Simple email/password authentication
@@ -78,7 +78,7 @@ budgie/
 ### Administration
 - **Admin Panel**: User management and system statistics
 
-## 🎯 Key Features by Page
+## Key Features by Page
 
 ### Dashboard (index.php)
 - Welcome message with user's name
@@ -111,7 +111,7 @@ budgie/
 - Scenario analysis (optimistic, realistic, pessimistic)
 - Monthly target selection
 
-## 🔧 Implementation Notes
+## Implementation Notes
 
 ### Current Status
 Budgie now ships with:
@@ -129,7 +129,7 @@ Budgie now ships with:
 4. **API layer or mobile client** if needed
 5. **Advanced security** such as 2FA and IP-based alerts
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 - Primary: `#2563eb` (Blue)
@@ -152,7 +152,7 @@ Budgie now ships with:
 - Responsive tables
 - Interactive charts
 
-## 📊 Subscription Plans
+## Subscription Plans
 
 ### Free Plan
 - 2 accounts maximum
@@ -170,7 +170,7 @@ Budgie now ships with:
 - Priority support
 - API access
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Option 1: Docker Deployment (Recommended)
 
@@ -194,7 +194,7 @@ Budgie now ships with:
 4. **Open the application** in your browser
 5. **Navigate through the pages** to see the complete UI
 
-### ✅ Automated Tests
+### Automated Tests
 
 Unit-style checks for the forecasting engine live in `tests/`. Run them with:
 
@@ -204,14 +204,8 @@ php tests/run.php
 
 They execute without touching the real database by using an in-memory repository, making them safe to run locally or in CI.
 
-### 🕵️ Activity Logging
+### Activity Logging
 
 Key business actions (auth events, account/expense/income CRUD) are logged in the `activity_logs` table, including metadata, IP, and user agent. Admins can review the latest entries from the administration dashboard. This audit trail helps during demos and makes it easier to trace suspicious behaviour.
-
-## 📝 License
-
-This project is part of an academic assignment for personal finance management application development.
-
----
 
 **Note**: The repository now contains the full PHP backend (auth, CRUD, forecasting, logging). Use the Docker or manual setup instructions above to run it end-to-end.
