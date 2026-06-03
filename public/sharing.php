@@ -4,45 +4,39 @@ requireLogin();
 $page_title = 'Partage';
 include SRC_PATH . '/includes/header.php';
 
-// Dummy data for shared accounts
-$shared_accounts = [
-    [
-        'id' => 1,
-        'account_name' => 'Compte Courant',
-        'owner' => 'Jean Dupont',
-        'shared_with' => 'marie.martin@example.com',
-        'access_type' => 'Lecture seule',
-        'shared_date' => '2024-12-15',
-        'status' => 'active'
-    ],
-    [
-        'id' => 2,
-        'account_name' => 'Livret A',
-        'owner' => 'Jean Dupont',
-        'shared_with' => 'pierre.durand@example.com',
-        'access_type' => 'Lecture seule',
-        'shared_date' => '2024-11-20',
-        'status' => 'active'
-    ]
-];
+// Fetch accounts I own that I can share
+$my_accounts = fetchAll(
+    "SELECT id, name FROM accounts WHERE user_id = ? AND deleted_at IS NULL",
+    [$_SESSION['user_id']]
+);
 
-// Dummy data for accounts I can share
-$my_accounts = [
-    ['id' => 1, 'name' => 'Compte Courant'],
-    ['id' => 2, 'name' => 'Livret A'],
-    ['id' => 3, 'name' => 'CTO']
-];
+// Fetch accounts I am sharing with others
+$shared_by_me = fetchAll(
+    "SELECT s.*, a.name as account_name 
+     FROM account_shares s 
+     JOIN accounts a ON s.account_id = a.id 
+     WHERE s.owner_id = ? AND s.status != 'revoked'",
+    [$_SESSION['user_id']]
+);
 
-// Dummy data for accounts shared with me
-$accounts_shared_with_me = [
-    [
-        'id' => 4,
-        'account_name' => 'Compte Famille',
-        'owner' => 'Sophie Bernard',
-        'access_type' => 'Lecture seule',
-        'shared_date' => '2024-10-10'
-    ]
-];
+// Fetch accounts shared with me
+$shared_with_me = fetchAll(
+    "SELECT s.*, a.name as account_name, u.first_name, u.last_name 
+     FROM account_shares s 
+     JOIN accounts a ON s.account_id = a.id 
+     JOIN users u ON s.owner_id = u.id 
+     WHERE (s.shared_with_user_id = ? OR s.shared_with_email = ?) 
+     AND s.status = 'accepted'",
+    [$_SESSION['user_id'], $_SESSION['user_email']]
+);
+
+// Fetch recent sharing activity
+$recent_shares = fetchAll(
+    "SELECT action, metadata, created_at FROM activity_logs 
+     WHERE user_id = ? AND entity_type = 'account_share' 
+     ORDER BY created_at DESC LIMIT 5",
+    [$_SESSION['user_id']]
+);
 ?>
 
 <div class="container">
@@ -97,19 +91,22 @@ $accounts_shared_with_me = [
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($shared_accounts as $share): ?>
+                    <?php if (empty($shared_by_me)): ?>
+                    <tr><td colspan="6" class="text-center">Vous ne partagez aucun compte pour le moment.</td></tr>
+                    <?php else: ?>
+                    <?php foreach ($shared_by_me as $share): ?>
                     <tr>
                         <td><strong><?php echo htmlspecialchars($share['account_name']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($share['shared_with']); ?></td>
-                        <td><?php echo $share['access_type']; ?></td>
-                        <td><?php echo date('d/m/Y', strtotime($share['shared_date'])); ?></td>
+                        <td><?php echo htmlspecialchars($share['shared_with_email']); ?></td>
+                        <td><?php echo $share['access_type'] === 'read_only' ? 'Lecture seule' : 'Lecture/Écriture'; ?></td>
+                        <td><?php echo formatDate($share['shared_at']); ?></td>
                         <td>
-                            <span class="<?php echo $share['status'] === 'active' ? 'text-success' : 'text-danger'; ?>">
+                            <span class="<?php echo $share['status'] === 'accepted' ? 'text-success' : 'text-warning'; ?>">
                                 <?php echo ucfirst($share['status']); ?>
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="openModal('editShareModal')">
+                            <button class="btn btn-sm btn-secondary" onclick="openModal('editShareModal', <?php echo $share['id']; ?>)">
                                 <span>✏️</span> Modifier
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir révoquer l\'accès ?')) { revokeAccess(<?php echo $share['id']; ?>); }">
@@ -118,6 +115,7 @@ $accounts_shared_with_me = [
                         </td>
                     </tr>
                     <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -140,19 +138,23 @@ $accounts_shared_with_me = [
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($accounts_shared_with_me as $share): ?>
+                    <?php if (empty($shared_with_me)): ?>
+                    <tr><td colspan="5" class="text-center">Aucun compte ne vous est partagé.</td></tr>
+                    <?php else: ?>
+                    <?php foreach ($shared_with_me as $share): ?>
                     <tr>
                         <td><strong><?php echo htmlspecialchars($share['account_name']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($share['owner']); ?></td>
-                        <td><?php echo $share['access_type']; ?></td>
-                        <td><?php echo date('d/m/Y', strtotime($share['shared_date'])); ?></td>
+                        <td><?php echo htmlspecialchars($share['first_name'] . ' ' . $share['last_name']); ?></td>
+                        <td><?php echo $share['access_type'] === 'read_only' ? 'Lecture seule' : 'Lecture/Écriture'; ?></td>
+                        <td><?php echo formatDate($share['shared_at']); ?></td>
                         <td>
-                            <a href="shared_account_details.php?id=<?php echo $share['id']; ?>" class="btn btn-sm btn-primary">
+                            <a href="shared_account_details.php?id=<?php echo $share['account_id']; ?>" class="btn btn-sm btn-primary">
                                 <span>👁️</span> Consulter
                             </a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -200,27 +202,20 @@ $accounts_shared_with_me = [
             <h3 class="card-title">Activité Récente</h3>
         </div>
         <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
-                <div>
-                    <strong>Invitation envoyée</strong>
-                    <p style="margin: 0; color: var(--gray-600);">Compte Courant → marie.martin@example.com</p>
+            <?php if (empty($recent_shares)): ?>
+                <p class="text-center text-muted">Aucune activité récente.</p>
+            <?php else: ?>
+                <?php foreach ($recent_shares as $log): ?>
+                <?php $meta = json_decode($log['metadata'], true); ?>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
+                    <div>
+                        <strong><?php echo htmlspecialchars($log['action']); ?></strong>
+                        <p style="margin: 0; color: var(--gray-600);"><?php echo htmlspecialchars($meta['email'] ?? ''); ?></p>
+                    </div>
+                    <span style="color: var(--gray-500); font-size: 0.875rem;"><?php echo formatDate($log['created_at']); ?></span>
                 </div>
-                <span style="color: var(--gray-500); font-size: 0.875rem;">Il y a 2 heures</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
-                <div>
-                    <strong>Accès révoqué</strong>
-                    <p style="margin: 0; color: var(--gray-600);">Livret A → pierre.durand@example.com</p>
-                </div>
-                <span style="color: var(--gray-500); font-size: 0.875rem;">Il y a 1 jour</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
-                <div>
-                    <strong>Nouvel accès reçu</strong>
-                    <p style="margin: 0; color: var(--gray-600);">Compte Famille ← sophie.bernard@example.com</p>
-                </div>
-                <span style="color: var(--gray-500); font-size: 0.875rem;">Il y a 3 jours</span>
-            </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 </div>

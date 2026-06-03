@@ -14,8 +14,9 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
     redirect('accounts.php');
 }
 
-$name = sanitizeInput($_POST['name'] ?? '');
-$description = sanitizeInput($_POST['description'] ?? '');
+$name = trim($_POST['name'] ?? '');
+$description = trim($_POST['description'] ?? '');
+$balance = floatval($_POST['balance'] ?? 0);
 $interest_rate = floatval($_POST['interest_rate'] ?? 0);
 $tax_rate = floatval($_POST['tax_rate'] ?? 0);
 
@@ -61,7 +62,7 @@ try {
         'user_id' => $_SESSION['user_id'],
         'name' => $name,
         'description' => $description,
-        'balance' => 0.00,
+        'balance' => $balance,
         'interest_rate' => $interest_rate,
         'tax_rate' => $tax_rate
     ]);

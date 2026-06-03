@@ -25,7 +25,8 @@ $growthPercent = $summary['current_balance'] > 0
     ? round(($netGain / $summary['current_balance']) * 100, 2)
     : 0;
 
-$chartPayload = htmlspecialchars(json_encode($chartData, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+// Encode chart data safely for inline JS (no htmlspecialchars needed - it goes in a script block)
+$chartPayload = json_encode($chartData, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_QUOT);
 
 include SRC_PATH . '/includes/header.php';
 ?>
@@ -95,11 +96,10 @@ include SRC_PATH . '/includes/header.php';
                 <h3 class="card-title">Évolution des Soldes</h3>
             </div>
             <div class="chart-container">
-                <canvas
-                    id="forecastChart"
-                    style="height: 400px;"
-                    data-chart="<?php echo $chartPayload; ?>"
-                ></canvas>
+                <canvas id="forecastChart" style="height: 400px;"></canvas>
+                <script>
+                    window.forecastChartData = <?php echo $chartPayload; ?>;
+                </script>
             </div>
         </div>
 

@@ -26,10 +26,10 @@ class ForecastService
 
     public function buildForecast(DateTime $targetDate, ?DateTime $startDate = null): array
     {
-        $this->targetDate = (clone $targetDate)->modify('first day of this month');
+        $this->targetDate = (clone $targetDate)->modify('first day of this month')->setTime(0, 0, 0);
         $this->startDate = $startDate
-            ? (clone $startDate)->modify('first day of this month')
-            : new DateTime('first day of this month');
+            ? (clone $startDate)->modify('first day of this month')->setTime(0, 0, 0)
+            : (new DateTime('first day of this month'))->setTime(0, 0, 0);
 
         if ($this->targetDate < $this->startDate) {
             $this->startDate = clone $this->targetDate;

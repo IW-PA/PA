@@ -6,6 +6,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Prevent aggressive browser caching on redirects and page reloads
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 define('BASE_PATH', dirname(__DIR__, 2));
 define('SRC_PATH', BASE_PATH . '/src');
 define('PUBLIC_PATH', BASE_PATH . '/public');
@@ -193,15 +198,15 @@ function checkSubscriptionLimits($userId, $type) {
     
     switch ($type) {
         case 'accounts':
-            $count = fetchOne("SELECT COUNT(*) as count FROM accounts WHERE user_id = ?", [$userId])['count'];
+            $count = fetchOne("SELECT COUNT(*) as count FROM accounts WHERE user_id = ? AND deleted_at IS NULL", [$userId])['count'];
             return $count < FREE_ACCOUNTS_LIMIT;
             
         case 'expenses':
-            $count = fetchOne("SELECT COUNT(*) as count FROM expenses WHERE user_id = ?", [$userId])['count'];
+            $count = fetchOne("SELECT COUNT(*) as count FROM expenses WHERE user_id = ? AND deleted_at IS NULL", [$userId])['count'];
             return $count < FREE_EXPENSES_LIMIT;
             
         case 'incomes':
-            $count = fetchOne("SELECT COUNT(*) as count FROM incomes WHERE user_id = ?", [$userId])['count'];
+            $count = fetchOne("SELECT COUNT(*) as count FROM incomes WHERE user_id = ? AND deleted_at IS NULL", [$userId])['count'];
             return $count < FREE_INCOMES_LIMIT;
             
         default:

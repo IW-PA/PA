@@ -4,39 +4,15 @@ requireLogin();
 $page_title = 'Comptes';
 include SRC_PATH . '/includes/header.php';
 
-// Dummy data for accounts
-$accounts = [
-    [
-        'id' => 1,
-        'name' => 'Compte Courant',
-        'description' => 'Compte courant Société Générale',
-        'balance' => 3500.00,
-        'interest_rate' => 0.0,
-        'tax_rate' => 0.0,
-        'created_date' => '2020-01-15'
-    ],
-    [
-        'id' => 2,
-        'name' => 'Livret A',
-        'description' => 'Livret A individuel',
-        'balance' => 8500.00,
-        'interest_rate' => 1.7,
-        'tax_rate' => 0.0,
-        'created_date' => '2018-03-10'
-    ],
-    [
-        'id' => 3,
-        'name' => 'CTO',
-        'description' => 'Compte Titre Ordinaire',
-        'balance' => 450.00,
-        'interest_rate' => 7.0,
-        'tax_rate' => 30.0,
-        'created_date' => '2022-06-20'
-    ]
-];
+// Fetch user's accounts from database
+$accounts = fetchAll(
+    "SELECT * FROM accounts WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC",
+    [$_SESSION['user_id']]
+);
 ?>
 
 <div class="container">
+
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Mes Comptes</h3>
@@ -46,7 +22,7 @@ $accounts = [
         </div>
 
         <div class="table-container">
-            <table class="table">
+            <table class="table" id="accounts-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -59,6 +35,13 @@ $accounts = [
                     </tr>
                 </thead>
                 <tbody>
+                    <?php if (empty($accounts)): ?>
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding: 2rem; color: var(--text-muted);">
+                            Aucun compte enregistré. Commencez par en créer un !
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                     <?php foreach ($accounts as $account): ?>
                     <tr>
                         <td><?php echo $account['id']; ?></td>
@@ -68,12 +51,25 @@ $accounts = [
                         <td><?php echo $account['interest_rate']; ?>%</td>
                         <td><?php echo $account['tax_rate']; ?>%</td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="openModal('editAccountModal')">
+                            <button class="btn btn-sm btn-secondary"
+                                onclick="openEditAccountModal(
+                                    <?php echo $account['id']; ?>,
+                                    <?php echo htmlspecialchars(json_encode($account['name']), ENT_QUOTES); ?>,
+                                    <?php echo htmlspecialchars(json_encode($account['description']), ENT_QUOTES); ?>,
+                                    <?php echo $account['balance']; ?>,
+                                    <?php echo $account['interest_rate']; ?>,
+                                    <?php echo $account['tax_rate']; ?>
+                                )">
                                 <span>✏️</span> Modifier
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer ce compte ?')) { /* Delete logic */ }">
-                                <span>🗑️</span> Supprimer
-                            </button>
+                            <form method="POST" action="actions/delete_account.php" style="display:inline;"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.')">
+                                <?php echo CSRFProtection::getTokenField(); ?>
+                                <input type="hidden" name="account_id" value="<?php echo $account['id']; ?>">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <span>🗑️</span> Supprimer
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -101,6 +97,10 @@ $accounts = [
                 <textarea id="account_description" name="description" class="form-input" rows="3"></textarea>
             </div>
             <div class="form-group">
+                <label for="account_balance" class="form-label">Solde initial (€)</label>
+                <input type="number" id="account_balance" name="balance" class="form-input" step="0.01" value="0.00" required>
+            </div>
+            <div class="form-group">
                 <label for="interest_rate" class="form-label">Taux de rémunération (%)</label>
                 <input type="number" id="interest_rate" name="interest_rate" class="form-input" step="0.01" min="0" max="100" value="0">
             </div>
@@ -125,7 +125,7 @@ $accounts = [
         </div>
         <form method="POST" action="actions/edit_account.php">
             <?php echo CSRFProtection::getTokenField(); ?>
-            <input type="hidden" name="account_id" value="">
+            <input type="hidden" id="edit_account_id" name="account_id" value="">
             <div class="form-group">
                 <label for="edit_account_name" class="form-label">Nom du compte</label>
                 <input type="text" id="edit_account_name" name="name" class="form-input" required>
@@ -133,6 +133,10 @@ $accounts = [
             <div class="form-group">
                 <label for="edit_account_description" class="form-label">Description</label>
                 <textarea id="edit_account_description" name="description" class="form-input" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit_account_balance" class="form-label">Solde (€)</label>
+                <input type="number" id="edit_account_balance" name="balance" class="form-input" step="0.01" required>
             </div>
             <div class="form-group">
                 <label for="edit_interest_rate" class="form-label">Taux de rémunération (%)</label>
@@ -149,5 +153,17 @@ $accounts = [
         </form>
     </div>
 </div>
+
+<script>
+function openEditAccountModal(id, name, description, balance, interestRate, taxRate) {
+    document.getElementById('edit_account_id').value = id;
+    document.getElementById('edit_account_name').value = name;
+    document.getElementById('edit_account_description').value = description;
+    document.getElementById('edit_account_balance').value = balance;
+    document.getElementById('edit_interest_rate').value = interestRate;
+    document.getElementById('edit_tax_rate').value = taxRate;
+    openModal('editAccountModal');
+}
+</script>
 
 <?php include SRC_PATH . '/includes/footer.php'; ?>

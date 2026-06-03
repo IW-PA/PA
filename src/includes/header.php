@@ -24,6 +24,9 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     $baseHref = $basePath . '/public/';
     ?>
     <base href="<?php echo htmlspecialchars($baseHref, ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -102,8 +105,18 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 <div class="user-menu">
                     <div class="user-info">
                         <span>👤</span>
-                        <span><?php echo isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Utilisateur'; ?></span>
+                        <span><?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Utilisateur'; ?></span>
                     </div>
                 </div>
             </header>
+            <?php
+            // Display global flash messages
+            $gFlashError   = getFlashMessage('error');
+            $gFlashSuccess = getFlashMessage('success');
+            if ($gFlashError): ?>
+            <div class="alert alert-danger" style="margin: 0 0 1rem 0;"><?php echo $gFlashError; ?></div>
+            <?php endif;
+            if ($gFlashSuccess): ?>
+            <div class="alert alert-success" style="margin: 0 0 1rem 0;"><?php echo htmlspecialchars($gFlashSuccess); ?></div>
+            <?php endif; ?>
     <?php endif; ?>

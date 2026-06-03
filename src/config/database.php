@@ -2,52 +2,55 @@
 // Database configuration for Budgie
 
 class Database {
-    private $host;
-    private $port;
-    private $db_name;
-    private $username;
-    private $password;
-    private $conn;
+    private string $host;
+    private string $port;
+    private string $db_name;
+    private string $username;
+    private string $password;
+    private static ?PDO $conn = null; // Static singleton connection
 
     public function __construct() {
-        // Load environment variables or use defaults
-        $this->host = defined('DB_HOST') ? DB_HOST : ($_ENV['DB_HOST'] ?? '127.0.0.1');
-        $this->port = defined('DB_PORT') ? DB_PORT : ($_ENV['DB_PORT'] ?? '3306');
-        $this->db_name = defined('DB_NAME') ? DB_NAME : ($_ENV['DB_NAME'] ?? 'budgie_db');
+        $this->host     = defined('DB_HOST') ? DB_HOST : ($_ENV['DB_HOST'] ?? '127.0.0.1');
+        $this->port     = defined('DB_PORT') ? DB_PORT : ($_ENV['DB_PORT'] ?? '3306');
+        $this->db_name  = defined('DB_NAME') ? DB_NAME : ($_ENV['DB_NAME'] ?? 'budgie_db');
         $this->username = defined('DB_USER') ? DB_USER : ($_ENV['DB_USER'] ?? 'root');
         $this->password = defined('DB_PASS') ? DB_PASS : ($_ENV['DB_PASS'] ?? '');
     }
 
-    public function getConnection() {
-        $this->conn = null;
+    public function getConnection(): PDO {
+        if (self::$conn !== null) {
+            return self::$conn;
+        }
 
         try {
-            $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name . ";charset=utf8mb4",
+            self::$conn = new PDO(
+                "mysql:host={$this->host};port={$this->port};dbname={$this->db_name};charset=utf8mb4",
                 $this->username,
                 $this->password,
                 [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4",
                 ]
             );
-        } catch(PDOException $exception) {
-            error_log("Database connection error: " . $exception->getMessage());
+        } catch (PDOException $e) {
+            error_log("Database connection error: " . $e->getMessage());
             throw new Exception("Database connection failed");
         }
 
-        return $this->conn;
+        return self::$conn;
     }
 
-    public function closeConnection() {
-        $this->conn = null;
+    public static function resetConnection(): void {
+        self::$conn = null;
     }
 }
 
-// Global database instance
-function getDB() {
+/**
+ * Returns the singleton PDO connection.
+ */
+function getDB(): PDO {
     static $db = null;
     if ($db === null) {
         $db = new Database();
@@ -55,60 +58,75 @@ function getDB() {
     return $db->getConnection();
 }
 
-// Helper function for prepared statements
-function executeQuery($sql, $params = []) {
+/**
+ * Execute a prepared statement and return the PDOStatement.
+ */
+function executeQuery(string $sql, array $params = []): PDOStatement {
     try {
-        $db = getDB();
-        $stmt = $db->prepare($sql);
+        $pdo  = getDB();
+        $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     } catch (PDOException $e) {
-        error_log("Query execution error: " . $e->getMessage());
-        throw new Exception("Database query failed");
+        error_log("Query execution error: " . $e->getMessage() . " | SQL: " . $sql);
+        throw new Exception("Database query failed: " . $e->getMessage());
     }
 }
 
-// Helper function for fetching single row
-function fetchOne($sql, $params = []) {
+/**
+ * Fetch a single row, or false if not found.
+ */
+function fetchOne(string $sql, array $params = []) {
     $stmt = executeQuery($sql, $params);
     return $stmt->fetch();
 }
 
-// Helper function for fetching multiple rows
-function fetchAll($sql, $params = []) {
+/**
+ * Fetch all rows.
+ */
+function fetchAll(string $sql, array $params = []): array {
     $stmt = executeQuery($sql, $params);
     return $stmt->fetchAll();
 }
 
-// Helper function for insert operations
-function insertRecord($table, $data) {
-    $columns = implode(',', array_keys($data));
+/**
+ * Insert a record and return the new auto-increment ID (or 0 on failure).
+ */
+function insertRecord(string $table, array $data): int {
+    $columns      = implode(', ', array_keys($data));
     $placeholders = ':' . implode(', :', array_keys($data));
-    
-    $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-    $stmt = executeQuery($sql, $data);
-    
-    return getDB()->lastInsertId();
+
+    $sql  = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+    // Use the SAME PDO connection for lastInsertId()
+    $pdo  = getDB();
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($data);
+
+    return (int) $pdo->lastInsertId();
 }
 
-// Helper function for update operations
-function updateRecord($table, $data, $where, $whereParams = []) {
-    $setClause = [];
+/**
+ * Update records and return the number of affected rows.
+ */
+function updateRecord(string $table, array $data, string $where, array $whereParams = []): int {
+    $setClauses = [];
     foreach ($data as $key => $value) {
-        $setClause[] = "{$key} = :{$key}";
+        $setClauses[] = "{$key} = :{$key}";
     }
-    $setClause = implode(', ', $setClause);
-    
-    $sql = "UPDATE {$table} SET {$setClause} WHERE {$where}";
+    $setClause = implode(', ', $setClauses);
+
+    $sql    = "UPDATE {$table} SET {$setClause} WHERE {$where}";
     $params = array_merge($data, $whereParams);
-    
+
     $stmt = executeQuery($sql, $params);
     return $stmt->rowCount();
 }
 
-// Helper function for delete operations
-function deleteRecord($table, $where, $params = []) {
-    $sql = "DELETE FROM {$table} WHERE {$where}";
+/**
+ * Delete records (hard delete) and return the number of affected rows.
+ */
+function deleteRecord(string $table, string $where, array $params = []): int {
+    $sql  = "DELETE FROM {$table} WHERE {$where}";
     $stmt = executeQuery($sql, $params);
     return $stmt->rowCount();
 }

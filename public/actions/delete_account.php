@@ -44,14 +44,14 @@ try {
         redirect('accounts.php');
     }
 
-    // Check if account has active expenses or incomes
+    // Check if account has active expenses or incomes (ignoring soft-deleted ones)
     $expenseCount = fetchOne(
-        "SELECT COUNT(*) as count FROM expenses WHERE account_id = ? AND is_active = 1",
+        "SELECT COUNT(*) as count FROM expenses WHERE account_id = ? AND deleted_at IS NULL",
         [$account_id]
     )['count'];
 
     $incomeCount = fetchOne(
-        "SELECT COUNT(*) as count FROM incomes WHERE account_id = ? AND is_active = 1",
+        "SELECT COUNT(*) as count FROM incomes WHERE account_id = ? AND deleted_at IS NULL",
         [$account_id]
     )['count'];
 
@@ -60,8 +60,11 @@ try {
         redirect('accounts.php');
     }
 
-    // Delete account
-    $rowsAffected = deleteRecord('accounts', 'id = :id', ['id' => $account_id]);
+    // Soft delete account
+    $rowsAffected = executeQuery(
+        "UPDATE accounts SET deleted_at = NOW() WHERE id = ? AND user_id = ?",
+        [$account_id, $_SESSION['user_id']]
+    )->rowCount();
 
     if ($rowsAffected > 0) {
         ActivityLogger::log(

@@ -4,49 +4,22 @@ requireLogin();
 $page_title = 'Dépenses';
 include SRC_PATH . '/includes/header.php';
 
-// Dummy data for expenses
-$expenses = [
-    [
-        'id' => 1,
-        'name' => 'Crédit Moto',
-        'description' => 'Crédit pour la Triumph Tiger 660 Sport 2023',
-        'account' => 'Compte Courant',
-        'amount' => 250.00,
-        'frequency' => 'Mensuel',
-        'start_date' => '2023-01-01',
-        'end_date' => '2028-12-31'
-    ],
-    [
-        'id' => 2,
-        'name' => 'iPhone 19',
-        'description' => 'iPhone 19 Pro Max Limited Hanna Montana Edition',
-        'account' => 'Compte Courant',
-        'amount' => 4321.00,
-        'frequency' => 'Ponctuel',
-        'start_date' => '2025-09-01',
-        'end_date' => null
-    ],
-    [
-        'id' => 3,
-        'name' => 'Courses Alimentaires',
-        'description' => 'Courses hebdomadaires',
-        'account' => 'Compte Courant',
-        'amount' => 150.00,
-        'frequency' => 'Hebdomadaire',
-        'start_date' => '2025-01-01',
-        'end_date' => null
-    ],
-    [
-        'id' => 4,
-        'name' => 'Essence',
-        'description' => 'Carburant voiture',
-        'account' => 'Compte Courant',
-        'amount' => 80.00,
-        'frequency' => 'Bi-mensuel',
-        'start_date' => '2025-01-01',
-        'end_date' => null
-    ]
-];
+// Fetch user's expenses with account names
+$expenses = fetchAll(
+    "SELECT e.*, a.name as account_name 
+     FROM expenses e 
+     JOIN accounts a ON e.account_id = a.id 
+     WHERE e.user_id = ? AND e.deleted_at IS NULL 
+     ORDER BY e.start_date DESC",
+    [$_SESSION['user_id']]
+);
+
+// Fetch user's accounts for the dropdowns
+$user_accounts = fetchAll(
+    "SELECT id, name FROM accounts WHERE user_id = ? AND deleted_at IS NULL",
+    [$_SESSION['user_id']]
+);
+
 ?>
 
 <div class="container">
@@ -59,7 +32,7 @@ $expenses = [
         </div>
 
         <!-- Filters -->
-        <div class="filters">
+        <div class="filters" id="expense-filters">
             <div class="filter-group">
                 <label for="search_expenses" class="form-label">Rechercher</label>
                 <input type="text" id="search_expenses" class="filter-input" placeholder="Nom ou description...">
@@ -68,25 +41,27 @@ $expenses = [
                 <label for="filter_account" class="form-label">Compte</label>
                 <select id="filter_account" class="filter-input">
                     <option value="">Tous les comptes</option>
-                    <option value="Compte Courant">Compte Courant</option>
-                    <option value="Livret A">Livret A</option>
-                    <option value="CTO">CTO</option>
+                    <?php foreach ($user_accounts as $acc): ?>
+                        <option value="<?php echo htmlspecialchars($acc['name']); ?>"><?php echo htmlspecialchars($acc['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="filter-group">
                 <label for="filter_frequency" class="form-label">Fréquence</label>
                 <select id="filter_frequency" class="filter-input">
                     <option value="">Toutes les fréquences</option>
-                    <option value="Ponctuel">Ponctuel</option>
-                    <option value="Mensuel">Mensuel</option>
-                    <option value="Hebdomadaire">Hebdomadaire</option>
-                    <option value="Bi-mensuel">Bi-mensuel</option>
+                    <option value="ponctuel">Ponctuel</option>
+                    <option value="mensuel">Mensuel</option>
+                    <option value="bimensuel">Bi-mensuel</option>
+                    <option value="trimestriel">Trimestriel</option>
+                    <option value="semestriel">Semestriel</option>
+                    <option value="annuel">Annuel</option>
                 </select>
             </div>
         </div>
 
-        <div class="table-container">
-            <table class="table">
+        <div class="table-container" id="expense-table-container">
+            <table class="table" id="expenses-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -101,23 +76,45 @@ $expenses = [
                     </tr>
                 </thead>
                 <tbody>
+                    <?php if (empty($expenses)): ?>
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding: 2rem; color: var(--text-muted);">
+                            Aucune dépense enregistrée. Commencez par en ajouter une !
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                     <?php foreach ($expenses as $expense): ?>
                     <tr>
                         <td><?php echo $expense['id']; ?></td>
                         <td><strong><?php echo htmlspecialchars($expense['name']); ?></strong></td>
                         <td><?php echo htmlspecialchars($expense['description']); ?></td>
-                        <td><?php echo htmlspecialchars($expense['account']); ?></td>
+                        <td><?php echo htmlspecialchars($expense['account_name']); ?></td>
                         <td class="text-danger"><strong>€<?php echo number_format($expense['amount'], 2); ?></strong></td>
-                        <td><?php echo $expense['frequency']; ?></td>
+                        <td><?php echo htmlspecialchars($expense['frequency']); ?></td>
                         <td><?php echo date('d/m/Y', strtotime($expense['start_date'])); ?></td>
                         <td><?php echo $expense['end_date'] ? date('d/m/Y', strtotime($expense['end_date'])) : 'N/A'; ?></td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="openModal('editExpenseModal')">
+                            <button class="btn btn-sm btn-secondary"
+                                onclick="openEditExpenseModal(
+                                    <?php echo $expense['id']; ?>,
+                                    <?php echo htmlspecialchars(json_encode($expense['name']), ENT_QUOTES); ?>,
+                                    <?php echo htmlspecialchars(json_encode($expense['description']), ENT_QUOTES); ?>,
+                                    <?php echo $expense['account_id']; ?>,
+                                    <?php echo $expense['amount']; ?>,
+                                    <?php echo htmlspecialchars(json_encode($expense['frequency']), ENT_QUOTES); ?>,
+                                    <?php echo htmlspecialchars(json_encode($expense['start_date']), ENT_QUOTES); ?>,
+                                    <?php echo htmlspecialchars(json_encode($expense['end_date'] ?? ''), ENT_QUOTES); ?>
+                                )">
                                 <span>✏️</span> Modifier
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) { /* Delete logic */ }">
-                                <span>🗑️</span> Supprimer
-                            </button>
+                            <form method="POST" action="actions/delete_expense.php" style="display:inline;"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')">
+                                <?php echo CSRFProtection::getTokenField(); ?>
+                                <input type="hidden" name="expense_id" value="<?php echo $expense['id']; ?>">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <span>🗑️</span> Supprimer
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -148,14 +145,14 @@ $expenses = [
                 <label for="expense_account" class="form-label">Compte</label>
                 <select id="expense_account" name="account_id" class="form-select" required>
                     <option value="">Sélectionner un compte</option>
-                    <option value="1">Compte Courant</option>
-                    <option value="2">Livret A</option>
-                    <option value="3">CTO</option>
+                    <?php foreach ($user_accounts as $acc): ?>
+                        <option value="<?php echo $acc['id']; ?>"><?php echo htmlspecialchars($acc['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="form-group">
                 <label for="expense_amount" class="form-label">Montant (€)</label>
-                <input type="number" id="expense_amount" name="amount" class="form-input" step="0.01" min="0" required>
+                <input type="number" id="expense_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
                 <label for="expense_frequency" class="form-label">Fréquence</label>
@@ -193,7 +190,8 @@ $expenses = [
             <button class="modal-close" onclick="closeModal('editExpenseModal')">&times;</button>
         </div>
         <form method="POST" action="actions/edit_expense.php">
-            <input type="hidden" name="expense_id" value="">
+            <?php echo CSRFProtection::getTokenField(); ?>
+            <input type="hidden" id="edit_expense_id" name="expense_id" value="">
             <div class="form-group">
                 <label for="edit_expense_name" class="form-label">Nom de la dépense</label>
                 <input type="text" id="edit_expense_name" name="name" class="form-input" required>
@@ -206,14 +204,14 @@ $expenses = [
                 <label for="edit_expense_account" class="form-label">Compte</label>
                 <select id="edit_expense_account" name="account_id" class="form-select" required>
                     <option value="">Sélectionner un compte</option>
-                    <option value="1">Compte Courant</option>
-                    <option value="2">Livret A</option>
-                    <option value="3">CTO</option>
+                    <?php foreach ($user_accounts as $acc): ?>
+                        <option value="<?php echo $acc['id']; ?>"><?php echo htmlspecialchars($acc['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="form-group">
                 <label for="edit_expense_amount" class="form-label">Montant (€)</label>
-                <input type="number" id="edit_expense_amount" name="amount" class="form-input" step="0.01" min="0" required>
+                <input type="number" id="edit_expense_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
                 <label for="edit_expense_frequency" class="form-label">Fréquence</label>
@@ -242,5 +240,71 @@ $expenses = [
         </form>
     </div>
 </div>
+
+<script>
+function openEditExpenseModal(id, name, description, accountId, amount, frequency, startDate, endDate) {
+    document.getElementById('edit_expense_id').value = id;
+    document.getElementById('edit_expense_name').value = name;
+    document.getElementById('edit_expense_description').value = description;
+    document.getElementById('edit_expense_amount').value = amount;
+    document.getElementById('edit_expense_start_date').value = startDate;
+    document.getElementById('edit_expense_end_date').value = endDate || '';
+
+    // Set account select
+    var accountSelect = document.getElementById('edit_expense_account');
+    for (var i = 0; i < accountSelect.options.length; i++) {
+        if (accountSelect.options[i].value == accountId) {
+            accountSelect.selectedIndex = i;
+            break;
+        }
+    }
+
+    // Set frequency select
+    var freqSelect = document.getElementById('edit_expense_frequency');
+    for (var i = 0; i < freqSelect.options.length; i++) {
+        if (freqSelect.options[i].value === frequency) {
+            freqSelect.selectedIndex = i;
+            break;
+        }
+    }
+
+    openModal('editExpenseModal');
+}
+
+// Filtering for expenses table
+document.addEventListener('DOMContentLoaded', function() {
+    var filterInputs = document.querySelectorAll('#expense-filters .filter-input');
+    var table = document.getElementById('expenses-table');
+
+    filterInputs.forEach(function(input) {
+        input.addEventListener('input', function() {
+            filterExpenses();
+        });
+    });
+
+    function filterExpenses() {
+        var searchVal = document.getElementById('search_expenses').value.toLowerCase();
+        var accountSelect = document.getElementById('filter_account');
+        var accountVal = accountSelect.value ? accountSelect.options[accountSelect.selectedIndex].text.toLowerCase() : '';
+        var freqSelect = document.getElementById('filter_frequency');
+        var freqVal = freqSelect.value ? freqSelect.options[freqSelect.selectedIndex].text.toLowerCase() : '';
+        var rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(function(row) {
+            if (row.cells.length < 7) { row.style.display = ''; return; }
+            var name = row.cells[1].textContent.toLowerCase();
+            var desc = row.cells[2].textContent.toLowerCase();
+            var account = row.cells[3].textContent.toLowerCase();
+            var freq = row.cells[5].textContent.toLowerCase();
+
+            var matchSearch = !searchVal || name.includes(searchVal) || desc.includes(searchVal);
+            var matchAccount = !accountVal || account.includes(accountVal);
+            var matchFreq = !freqVal || freq.includes(freqVal);
+
+            row.style.display = (matchSearch && matchAccount && matchFreq) ? '' : 'none';
+        });
+    }
+});
+</script>
 
 <?php include SRC_PATH . '/includes/footer.php'; ?>

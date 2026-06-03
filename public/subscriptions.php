@@ -4,15 +4,26 @@ requireLogin();
 $page_title = 'Abonnements';
 include SRC_PATH . '/includes/header.php';
 
-// Simulate current subscription
+// Get user's current subscription from database
+$user_info = fetchOne(
+    "SELECT subscription_type, subscription_start_date, subscription_end_date FROM users WHERE id = ?",
+    [$_SESSION['user_id']]
+);
+
 $current_subscription = [
-    'plan' => 'Gratuit',
-    'accounts_limit' => 2,
-    'expenses_limit' => 7,
-    'incomes_limit' => 2,
-    'next_billing' => null,
-    'price' => 0
+    'plan' => ucfirst($user_info['subscription_type']),
+    'accounts_limit' => $user_info['subscription_type'] === 'premium' ? 'Illimité' : FREE_ACCOUNTS_LIMIT,
+    'expenses_limit' => $user_info['subscription_type'] === 'premium' ? 'Illimité' : FREE_EXPENSES_LIMIT,
+    'incomes_limit' => $user_info['subscription_type'] === 'premium' ? 'Illimité' : FREE_INCOMES_LIMIT,
+    'next_billing' => $user_info['subscription_end_date'] ? formatDate($user_info['subscription_end_date']) : null,
+    'price' => $user_info['subscription_type'] === 'premium' ? 9.99 : 0
 ];
+
+// Fetch payment history
+$payments = fetchAll(
+    "SELECT * FROM subscription_payments WHERE user_id = ? ORDER BY payment_date DESC",
+    [$_SESSION['user_id']]
+);
 
 $subscription_plans = [
     [
@@ -192,28 +203,27 @@ $subscription_plans = [
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>15/01/2025</td>
-                        <td>Abonnement Premium - Janvier 2025</td>
-                        <td>€9.99</td>
-                        <td><span class="text-success">Payé</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary" onclick="downloadInvoice('2025-01-15')">
-                                <span>📄</span> Télécharger
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>15/12/2024</td>
-                        <td>Abonnement Premium - Décembre 2024</td>
-                        <td>€9.99</td>
-                        <td><span class="text-success">Payé</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary" onclick="downloadInvoice('2024-12-15')">
-                                <span>📄</span> Télécharger
-                            </button>
-                        </td>
-                    </tr>
+                    <?php if (empty($payments)): ?>
+                    <tr><td colspan="5" class="text-center">Aucun historique de paiement.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($payments as $payment): ?>
+                        <tr>
+                            <td><?php echo formatDate($payment['payment_date']); ?></td>
+                            <td>Abonnement Premium - <?php echo date('F Y', strtotime($payment['payment_date'])); ?></td>
+                            <td><?php echo formatCurrency($payment['amount']); ?></td>
+                            <td>
+                                <span class="<?php echo $payment['status'] === 'succeeded' ? 'text-success' : 'text-danger'; ?>">
+                                    <?php echo $payment['status'] === 'succeeded' ? 'Payé' : ucfirst($payment['status']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary" onclick="downloadInvoice('<?php echo $payment['id']; ?>')">
+                                    <span>📄</span> Télécharger
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

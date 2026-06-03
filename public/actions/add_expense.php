@@ -14,11 +14,11 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
     redirect('expenses.php');
 }
 
-$name = sanitizeInput($_POST['name'] ?? '');
-$description = sanitizeInput($_POST['description'] ?? '');
+$name = trim($_POST['name'] ?? '');
+$description = trim($_POST['description'] ?? '');
 $account_id = intval($_POST['account_id'] ?? 0);
 $amount = floatval($_POST['amount'] ?? 0);
-$frequency = sanitizeInput($_POST['frequency'] ?? '');
+$frequency = trim($_POST['frequency'] ?? '');
 $start_date = $_POST['start_date'] ?? '';
 $end_date = $_POST['end_date'] ?? '';
 

@@ -10,7 +10,7 @@ class ForecastRepository implements ForecastRepositoryInterface
         return fetchAll(
             "SELECT id, name, description, balance, interest_rate, tax_rate
              FROM accounts
-             WHERE user_id = ?
+             WHERE user_id = ? AND deleted_at IS NULL
              ORDER BY created_at ASC",
             [$userId]
         );
@@ -21,7 +21,7 @@ class ForecastRepository implements ForecastRepositoryInterface
         return fetchAll(
             "SELECT id, account_id, name, amount, frequency, start_date, end_date
              FROM incomes
-             WHERE user_id = ?
+             WHERE user_id = ? AND deleted_at IS NULL
              ORDER BY start_date ASC",
             [$userId]
         );
@@ -32,7 +32,7 @@ class ForecastRepository implements ForecastRepositoryInterface
         return fetchAll(
             "SELECT id, account_id, name, amount, frequency, start_date, end_date
              FROM expenses
-             WHERE user_id = ?
+             WHERE user_id = ? AND deleted_at IS NULL
              ORDER BY start_date ASC",
             [$userId]
         );

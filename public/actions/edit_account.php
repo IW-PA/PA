@@ -15,8 +15,9 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
 }
 
 $account_id = intval($_POST['account_id'] ?? 0);
-$name = sanitizeInput($_POST['name'] ?? '');
-$description = sanitizeInput($_POST['description'] ?? '');
+$name = trim($_POST['name'] ?? '');
+$description = trim($_POST['description'] ?? '');
+$balance = floatval($_POST['balance'] ?? 0);
 $interest_rate = floatval($_POST['interest_rate'] ?? 0);
 $tax_rate = floatval($_POST['tax_rate'] ?? 0);
 
@@ -71,6 +72,7 @@ try {
     $rowsAffected = updateRecord('accounts', [
         'name' => $name,
         'description' => $description,
+        'balance' => $balance,
         'interest_rate' => $interest_rate,
         'tax_rate' => $tax_rate
     ], 'id = :id', ['id' => $account_id]);
