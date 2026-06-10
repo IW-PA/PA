@@ -1,0 +1,38 @@
+# Version control & IDE
+.git
+.gitignore
+.vs
+.vscode
+.idea
+
+# Docs (kept out of the image; project markdown lives outside the repo)
+*.md
+Sujet.pdf
+
+# Build / deploy tooling and compose (not needed inside the app image)
+docker-compose.yml
+Dockerfile
+.dockerignore
+deploy.sh
+deploy.bat
+
+# Database scripts are loaded into MySQL via compose volume, not the app image
+database
+
+# Tests
+tests
+
+# Local environment & secrets (compose provides env at runtime)
+.env
+.env.*
+env.example
+
+# Dev-only diagnostic / dump pages — never ship these
+test.php
+test.txt
+public/dump_db.php
+public/_diag.php
+.htaccess.backup
+
+# Stray DB dump
+budgie_db*.sql

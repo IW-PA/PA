@@ -1,0 +1,24 @@
+# Secrets & local environment
+.env
+.env.*
+!env.example
+
+# Generated / tooling databases (e.g. ruflo MCP)
+ruvector.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Logs & runtime
+logs/
+*.log
+public/uploads/*
+!public/uploads/.gitkeep
+
+# OS cruft
+.DS_Store
+Thumbs.db

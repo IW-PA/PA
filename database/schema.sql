@@ -12,9 +12,11 @@ CREATE TABLE users (
     email VARCHAR(190) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     subscription_type ENUM('free', 'premium') DEFAULT 'free',
+    role ENUM('user', 'admin') NOT NULL DEFAULT 'user',
     subscription_start_date DATETIME NULL,
     subscription_end_date DATETIME NULL,
     stripe_customer_id VARCHAR(255) NULL,
+    stripe_subscription_id VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
@@ -32,6 +34,7 @@ CREATE TABLE accounts (
     tax_rate DECIMAL(5,2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -49,6 +52,7 @@ CREATE TABLE expenses (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
 );
@@ -67,6 +71,7 @@ CREATE TABLE incomes (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
 );
@@ -192,6 +197,22 @@ CREATE INDEX idx_user_sessions_token ON user_sessions(session_token);
 CREATE INDEX idx_password_reset_tokens_token ON password_reset_tokens(token);
 CREATE INDEX idx_activity_logs_user ON activity_logs(user_id);
 CREATE INDEX idx_activity_logs_action ON activity_logs(action);
+CREATE INDEX idx_users_role ON users(role);
+
+-- Admin activity log (audit trail for administrative actions)
+CREATE TABLE admin_activity_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    target_type VARCHAR(50) NOT NULL,
+    target_id INT NULL,
+    details TEXT NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_admin_activity_admin_id (admin_id),
+    INDEX idx_admin_activity_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insert sample data
 INSERT INTO users (first_name, last_name, email, password_hash, subscription_type) VALUES
@@ -199,8 +220,8 @@ INSERT INTO users (first_name, last_name, email, password_hash, subscription_typ
 ('Marie', 'Martin', 'marie.martin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'premium'),
 ('Admin', 'User', 'admin@budgie.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'premium');
 
--- Update admin user role (we'll handle this in the application)
-UPDATE users SET first_name = 'Admin', last_name = 'Administrator' WHERE email = 'admin@budgie.com';
+-- Promote the admin account: grant the admin role used by the admin panel/auth
+UPDATE users SET first_name = 'Admin', last_name = 'Administrator', role = 'admin' WHERE email = 'admin@budgie.com';
 
 -- Sample accounts
 INSERT INTO accounts (user_id, name, description, balance, interest_rate, tax_rate) VALUES
