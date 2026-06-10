@@ -1,6 +1,44 @@
 <?php
 require_once __DIR__ . '/../src/config/config.php';
+require_once SRC_PATH . '/services/SubscriptionService.php';
+require_once SRC_PATH . '/services/ActivityLogger.php';
 requireLogin();
+
+// Handle the return from Stripe Checkout (verify the session before granting access).
+if (($_GET['checkout'] ?? '') === 'success' && !empty($_GET['session_id']) && STRIPE_SECRET_KEY !== '') {
+    try {
+        $stripe  = new StripeClient();
+        $session = $stripe->retrieveCheckoutSession($_GET['session_id']);
+        $belongsToUser = (string) ($session['metadata']['user_id'] ?? '') === (string) $_SESSION['user_id'];
+
+        if ($belongsToUser && ($session['payment_status'] ?? '') === 'paid') {
+            SubscriptionService::activatePremium(
+                (int) $_SESSION['user_id'],
+                $session['subscription'] ?? null,
+                null
+            );
+            SubscriptionService::recordPayment(
+                (int) $_SESSION['user_id'],
+                isset($session['amount_total']) ? $session['amount_total'] / 100 : PREMIUM_PRICE,
+                $session['currency'] ?? 'eur',
+                'succeeded',
+                $session['id'] ?? null
+            );
+            ActivityLogger::log((int) $_SESSION['user_id'], 'subscription.activated', 'user', (int) $_SESSION['user_id']);
+            setFlashMessage('success', 'Bienvenue dans Budgie Premium ! Votre abonnement est actif.');
+        } else {
+            setFlashMessage('error', 'Le paiement n\'a pas pu être confirmé.');
+        }
+    } catch (Exception $e) {
+        error_log('Checkout verification error: ' . $e->getMessage());
+        setFlashMessage('error', 'Impossible de vérifier le paiement.');
+    }
+    redirect('subscriptions.php');
+} elseif (($_GET['checkout'] ?? '') === 'cancel') {
+    setFlashMessage('error', 'Paiement annulé. Aucun montant n\'a été débité.');
+    redirect('subscriptions.php');
+}
+
 $page_title = 'Abonnements';
 include SRC_PATH . '/includes/header.php';
 
@@ -9,6 +47,9 @@ $user_info = fetchOne(
     "SELECT subscription_type, subscription_start_date, subscription_end_date FROM users WHERE id = ?",
     [$_SESSION['user_id']]
 );
+
+$isPremium    = $user_info['subscription_type'] === 'premium';
+$paymentReady = STRIPE_SECRET_KEY !== '' && STRIPE_PRICE_ID !== '';
 
 $current_subscription = [
     'plan' => ucfirst($user_info['subscription_type']),
@@ -37,7 +78,8 @@ $subscription_plans = [
             'Prévisions basiques',
             'Support email'
         ],
-        'current' => true,
+        'current' => !$isPremium,
+        'plan_key' => 'free',
         'button_text' => 'Plan Actuel',
         'button_class' => 'btn-secondary'
     ],
@@ -55,7 +97,8 @@ $subscription_plans = [
             'Exports Excel/PDF',
             'API access'
         ],
-        'current' => false,
+        'current' => $isPremium,
+        'plan_key' => 'premium',
         'button_text' => 'Passer au Premium',
         'button_class' => 'btn-primary'
     ]
@@ -116,11 +159,20 @@ $subscription_plans = [
                     <li><?php echo $feature; ?></li>
                     <?php endforeach; ?>
                 </ul>
-                <button class="btn <?php echo $plan['button_class']; ?> btn-lg" 
-                        onclick="<?php echo $plan['current'] ? 'alert(\'Vous utilisez déjà ce plan\')' : 'subscribeToPlan(\'' . $plan['name'] . '\')'; ?>"
-                        <?php echo $plan['current'] ? 'disabled' : ''; ?>>
-                    <?php echo $plan['button_text']; ?>
-                </button>
+                <?php if ($plan['current']): ?>
+                    <button class="btn btn-secondary btn-lg" disabled>Plan Actuel</button>
+                <?php elseif ($plan['plan_key'] === 'premium'): ?>
+                    <?php if ($paymentReady): ?>
+                    <form method="POST" action="actions/create_checkout_session.php" style="margin:0;">
+                        <?php echo CSRFProtection::getTokenField(); ?>
+                        <button type="submit" class="btn btn-primary btn-lg"><?php echo $plan['button_text']; ?></button>
+                    </form>
+                    <?php else: ?>
+                    <button class="btn btn-primary btn-lg" disabled title="Paiement non configuré">Bientôt disponible</button>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <button class="btn btn-secondary btn-lg" disabled>Inclus</button>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
@@ -229,21 +281,26 @@ $subscription_plans = [
         </div>
     </div>
 
-    <!-- Payment Method -->
+    <?php if ($isPremium): ?>
+    <!-- Subscription management (Stripe Customer Portal) -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Méthode de Paiement</h3>
+            <h3 class="card-title">Gérer mon Abonnement</h3>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
             <div>
-                <strong>💳 **** **** **** 4242</strong>
-                <p style="margin: 0; color: var(--gray-600);">Expire le 12/26</p>
+                <strong>💳 Abonnement Premium actif</strong>
+                <p style="margin: 0; color: var(--gray-600);">Mettez à jour votre moyen de paiement, consultez vos factures ou résiliez via le portail sécurisé Stripe.</p>
             </div>
-            <button class="btn btn-secondary" onclick="openModal('updatePaymentModal')">
-                <span>✏️</span> Modifier
-            </button>
+            <form method="POST" action="actions/customer_portal.php" style="margin:0;">
+                <?php echo CSRFProtection::getTokenField(); ?>
+                <button type="submit" class="btn btn-primary">
+                    <span>⚙️</span> Gérer / Résilier
+                </button>
+            </form>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- FAQ -->
     <div class="card">
@@ -271,52 +328,10 @@ $subscription_plans = [
     </div>
 </div>
 
-<!-- Update Payment Modal -->
-<div id="updatePaymentModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Mettre à jour la Méthode de Paiement</h3>
-            <button class="modal-close" onclick="closeModal('updatePaymentModal')">&times;</button>
-        </div>
-        <form method="POST" action="actions/update_payment.php">
-            <div class="form-group">
-                <label for="card_number" class="form-label">Numéro de carte</label>
-                <input type="text" id="card_number" name="card_number" class="form-input" placeholder="1234 5678 9012 3456" required>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    <label for="expiry_date" class="form-label">Date d'expiration</label>
-                    <input type="text" id="expiry_date" name="expiry_date" class="form-input" placeholder="MM/AA" required>
-                </div>
-                <div class="form-group">
-                    <label for="cvv" class="form-label">CVV</label>
-                    <input type="text" id="cvv" name="cvv" class="form-input" placeholder="123" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="cardholder_name" class="form-label">Nom du titulaire</label>
-                <input type="text" id="cardholder_name" name="cardholder_name" class="form-input" required>
-            </div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('updatePaymentModal')">Annuler</button>
-                <button type="submit" class="btn btn-primary">Mettre à jour</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
-function subscribeToPlan(planName) {
-    if (confirm('Êtes-vous sûr de vouloir passer au plan ' + planName + ' ?')) {
-        // This would integrate with Stripe
-        console.log('Subscribing to plan:', planName);
-        alert('Redirection vers le paiement...');
-    }
-}
-
 function downloadInvoice(date) {
-    console.log('Downloading invoice for:', date);
-    alert('Téléchargement de la facture...');
+    // Invoices are available from the Stripe Customer Portal ("Gérer / Résilier").
+    alert('Vos factures sont disponibles dans le portail « Gérer mon Abonnement ».');
 }
 </script>
 

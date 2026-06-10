@@ -48,6 +48,8 @@ if (!defined('DB_PASS')) {
 define('STRIPE_PUBLISHABLE_KEY', $_ENV['STRIPE_PUBLISHABLE_KEY'] ?? '');
 define('STRIPE_SECRET_KEY', $_ENV['STRIPE_SECRET_KEY'] ?? '');
 define('STRIPE_WEBHOOK_SECRET', $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '');
+define('STRIPE_PRICE_ID', $_ENV['STRIPE_PRICE_ID'] ?? ''); // Premium recurring price (9.99 €/mo)
+define('PREMIUM_PRICE', 9.99);
 
 // Email settings
 define('SMTP_HOST', $_ENV['SMTP_HOST'] ?? 'smtp.gmail.com');
