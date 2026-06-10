@@ -30,7 +30,7 @@ try {
     $stripe = new StripeClient();
     $portal = $stripe->createBillingPortalSession(
         $user['stripe_customer_id'],
-        rtrim(APP_URL, '/') . '/public/subscriptions.php'
+        getBaseUrl() . '/public/subscriptions.php'
     );
     header('Location: ' . $portal['url']);
     exit;

@@ -32,7 +32,7 @@ try {
     $stripe     = new StripeClient();
     $customerId = SubscriptionService::ensureCustomer($userId, $stripe);
 
-    $base      = rtrim(APP_URL, '/');
+    $base      = getBaseUrl();
     $successUrl = $base . '/public/subscriptions.php?checkout=success&session_id={CHECKOUT_SESSION_ID}';
     $cancelUrl  = $base . '/public/subscriptions.php?checkout=cancel';
 

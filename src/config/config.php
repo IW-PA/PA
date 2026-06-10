@@ -145,6 +145,23 @@ function formatDate($date, $format = 'd/m/Y') {
     return date($format, strtotime($date));
 }
 
+/**
+ * Build the externally-visible base URL (scheme://host:port) from the current
+ * request, so redirects back from Stripe land on the same host the user used
+ * (works for localhost, a VM IP like 192.168.x.x:8082, or a real domain).
+ * Falls back to APP_URL when there is no request context.
+ */
+function getBaseUrl() {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host === '') {
+        return rtrim(APP_URL, '/');
+    }
+    $https  = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
+           || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+           || (($_SERVER['SERVER_PORT'] ?? '') === '443');
+    return ($https ? 'https' : 'http') . '://' . $host;
+}
+
 function redirect($url) {
     // If absolute URL, redirect as-is
     if (preg_match('#^https?://#i', $url)) {
