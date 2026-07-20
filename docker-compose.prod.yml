@@ -49,7 +49,7 @@ services:
       DB_NAME: ${DB_NAME:-budgie_db}
       DB_USER: ${DB_USER:-budgie_user}
       DB_PASS: ${DB_PASS:?DB_PASS must be set in /opt/budgie/.env}
-      APP_URL: https://vendfleet.com
+      APP_URL: https://budgie.allan-morlet.fr
       APP_ENV: production
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set in /opt/budgie/.env}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
