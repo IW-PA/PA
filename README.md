@@ -217,3 +217,5 @@ This project is part of an academic assignment for personal finance management a
 ---
 
 **Note**: The repository now contains the full PHP backend (auth, CRUD, forecasting, logging). Use the Docker or manual setup instructions above to run it end-to-end.
+
+Made with 🧠 by ayaz
