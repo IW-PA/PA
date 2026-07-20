@@ -1,5 +1,7 @@
 # 🐦 Budgie - Personal Finance Management App
 
+[![CI/CD — test & deploy](https://github.com/IW-PA/PA/actions/workflows/deploy.yml/badge.svg)](https://github.com/IW-PA/PA/actions/workflows/deploy.yml)
+
 Budgie is a modern, minimal personal finance web application built with pure PHP, HTML, CSS, and JavaScript. It helps users track their expenses, manage accounts, and plan their financial future without requiring bank connections.
 
 ## 🚀 Features
