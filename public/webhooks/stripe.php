@@ -57,14 +57,18 @@ try {
             if ($userId) {
                 $periodEnd = $object['lines']['data'][0]['period']['end'] ?? ($object['period_end'] ?? null);
                 SubscriptionService::activatePremium($userId, $object['subscription'] ?? null, $periodEnd ? (int) $periodEnd : null);
-                $amount = isset($object['amount_paid']) ? $object['amount_paid'] / 100 : 0;
-                SubscriptionService::recordPayment(
-                    $userId,
-                    (float) $amount,
-                    $object['currency'] ?? 'eur',
-                    'succeeded',
-                    $object['id'] ?? null
-                );
+                // Stripe fires BOTH invoice.paid and invoice.payment_succeeded for the same
+                // invoice. Record the payment on a single one so the history holds one row.
+                if ($type === 'invoice.payment_succeeded') {
+                    $amount = isset($object['amount_paid']) ? $object['amount_paid'] / 100 : 0;
+                    SubscriptionService::recordPayment(
+                        $userId,
+                        (float) $amount,
+                        $object['currency'] ?? 'eur',
+                        'succeeded',
+                        $object['id'] ?? null
+                    );
+                }
             }
             break;
 

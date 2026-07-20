@@ -3,10 +3,12 @@
 require_once __DIR__ . '/TestCase.php';
 require_once __DIR__ . '/ForecastServiceTest.php';
 require_once __DIR__ . '/PdfReportServiceTest.php';
+require_once __DIR__ . '/SubscriptionPaymentTest.php';
 
 $tests = [
     new ForecastServiceTest(),
     new PdfReportServiceTest(),
+    new SubscriptionPaymentTest(),
 ];
 
 $hasFailures = false;

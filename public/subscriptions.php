@@ -12,17 +12,14 @@ if (($_GET['checkout'] ?? '') === 'success' && !empty($_GET['session_id']) && ST
         $belongsToUser = (string) ($session['metadata']['user_id'] ?? '') === (string) $_SESSION['user_id'];
 
         if ($belongsToUser && ($session['payment_status'] ?? '') === 'paid') {
+            // Activate immediately for a responsive UX. The payment/invoice record itself is
+            // written by the Stripe webhook (invoice.payment_succeeded), which is the single
+            // source of truth — recording it here too would duplicate the invoice history
+            // (the redirect keys on the checkout-session id, the webhook on the invoice id).
             SubscriptionService::activatePremium(
                 (int) $_SESSION['user_id'],
                 $session['subscription'] ?? null,
                 null
-            );
-            SubscriptionService::recordPayment(
-                (int) $_SESSION['user_id'],
-                isset($session['amount_total']) ? $session['amount_total'] / 100 : PREMIUM_PRICE,
-                $session['currency'] ?? 'eur',
-                'succeeded',
-                $session['id'] ?? null
             );
             ActivityLogger::log((int) $_SESSION['user_id'], 'subscription.activated', 'user', (int) $_SESSION['user_id']);
             setFlashMessage('success', 'Bienvenue dans Budgie Premium ! Votre abonnement est actif.');
