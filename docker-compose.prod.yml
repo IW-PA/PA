@@ -1,0 +1,64 @@
+# Production stack for vendfleet.com — Budgie (PHP/Apache monolith).
+# Integrated into the existing Traefik on the shared external `edge` network.
+# No published host ports: Traefik reaches the app by its network alias.
+#   Traefik router  vendfleet.com/*  ->  budgie-app:80
+# MySQL stays on an internal-only network (no egress, not reachable by Traefik).
+# Secrets come from ./.env (compose interpolation).
+name: budgie
+
+networks:
+  edge:
+    external: true          # shared with Traefik
+  internal:
+    internal: true          # app <-> mysql only, no egress
+
+volumes:
+  mysql_data:
+
+services:
+  budgie-mysql:
+    image: mysql:8.0
+    container_name: budgie_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD must be set in /opt/budgie/.env}
+      MYSQL_DATABASE: ${DB_NAME:-budgie_db}
+      MYSQL_USER: ${DB_USER:-budgie_user}
+      MYSQL_PASSWORD: ${DB_PASS:?DB_PASS must be set in /opt/budgie/.env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  budgie-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: budgie_app
+    restart: unless-stopped
+    depends_on:
+      budgie-mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: budgie-mysql
+      DB_NAME: ${DB_NAME:-budgie_db}
+      DB_USER: ${DB_USER:-budgie_user}
+      DB_PASS: ${DB_PASS:?DB_PASS must be set in /opt/budgie/.env}
+      APP_URL: https://vendfleet.com
+      APP_ENV: production
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set in /opt/budgie/.env}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-price_1TvE11Buv3T8qwkSvtJJ1a3g}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    volumes:
+      - ./logs:/var/www/html/logs
+      - ./public/uploads:/var/www/html/public/uploads
+    networks:
+      - edge          # reachable by Traefik
+      - internal      # reaches MySQL
