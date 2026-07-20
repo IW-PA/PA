@@ -3,8 +3,15 @@
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="">
 <head>
+    <script>
+        // Apply saved theme immediately to prevent flash of unstyled content
+        (function() {
+            var t = localStorage.getItem('budgie-theme');
+            if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Budgie — Ton partenaire financier personnel. Suivez vos dépenses, revenus et faites des prévisions sans connexion bancaire.">
@@ -118,6 +125,10 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                     <h2><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h2>
                 </div>
                 <div class="user-menu">
+                    <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Basculer le mode sombre" title="Mode sombre">
+                        <svg id="dmIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <span id="dmText">Thème</span>
+                    </button>
                     <div class="user-info">
                         <span><?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Utilisateur'; ?></span>
                     </div>

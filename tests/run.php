@@ -2,9 +2,11 @@
 
 require_once __DIR__ . '/TestCase.php';
 require_once __DIR__ . '/ForecastServiceTest.php';
+require_once __DIR__ . '/PdfReportServiceTest.php';
 
 $tests = [
     new ForecastServiceTest(),
+    new PdfReportServiceTest(),
 ];
 
 $hasFailures = false;

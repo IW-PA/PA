@@ -27,9 +27,14 @@ $user_accounts = fetchAll(
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Mes Revenus</h3>
-            <button class="btn btn-primary" onclick="openModal('addIncomeModal')">
-                Ajouter un Revenu
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary" onclick="openModal('exportPdfModal')">
+                    📄 Exporter PDF
+                </button>
+                <button class="btn btn-primary" onclick="openModal('addIncomeModal')">
+                    Ajouter un Revenu
+                </button>
+            </div>
         </div>
 
         <!-- Filters -->

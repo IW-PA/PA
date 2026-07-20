@@ -23,11 +23,7 @@ include SRC_PATH . '/includes/header.php';
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" name="remember_me" value="1">
-                    <span style="font-size: 0.875rem;">Se souvenir de moi</span>
-                </label>
-                <a href="forgot_password.php" style="font-size: 0.875rem; color: var(--primary-color);">Mot de passe oublié ?</a>
+                <h1 style="color: var(--primary-color); margin-bottom: 0.5rem;">🐦 Budgie</h1>    <a href="forgot_password.php" style="font-size: 0.875rem; color: var(--primary-color);">Mot de passe oublié ?</a>
             </div>
 
             <?php if (APP_ENV === 'development' && isset($_SESSION['dev_reset_link'])): ?>

@@ -45,8 +45,10 @@ try {
     );
     
     // In real app: send email with reset link
-    // For now, we'll just log it (for demo purposes)
-    $resetLink = APP_URL . "/reset_password.php?token=" . $token;
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    $publicPos = strpos($script, '/public');
+    $basePath = $publicPos !== false ? substr($script, 0, $publicPos) : '';
+    $resetLink = getBaseUrl() . $basePath . "/public/reset_password.php?token=" . $token;
     
     // Log the activity
     ActivityLogger::log(

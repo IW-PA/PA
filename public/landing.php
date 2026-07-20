@@ -7,7 +7,13 @@ $basePath = $publicPos !== false ? substr($script, 0, $publicPos) : '';
 $baseHref = $basePath . '/public/';
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="">
+<script>
+(function(){
+    var t = localStorage.getItem('budgie-theme');
+    if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+})();
+</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -275,6 +281,86 @@ a { text-decoration: none; color: inherit; }
     .security-banner { padding: 2.5rem 1.75rem; }
     .footer-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Dark Mode ── */
+[data-theme="dark"] {
+    --wine:   #f252a1;
+    --pink:   #ff79c6;
+    --cream:  #1a1a2e;
+    --dark:   #e2e8ff;
+    --muted:  #9aa5ce;
+    --border: #30344e;
+    --white:  #16213e;
+    --green:  #50fa7b;
+}
+[data-theme="dark"] body { background: #1a1a2e; color: #e2e8ff; }
+[data-theme="dark"] .lp-nav { background: rgba(22,33,62,.96); border-bottom-color: #30344e; }
+[data-theme="dark"] .lp-links a { color: #9aa5ce; }
+[data-theme="dark"] .lp-links a:hover { color: #f252a1; }
+[data-theme="dark"] .link-btn { color: #9aa5ce; }
+[data-theme="dark"] .link-btn:hover { color: #f252a1; }
+[data-theme="dark"] .hero { background: linear-gradient(135deg, #1a1a2e 0%, #1e213d 50%, #2a1040 100%); border-bottom-color: #30344e; }
+[data-theme="dark"] .badge-pill { background: rgba(242,82,161,.12); color: #f252a1; border-color: rgba(242,82,161,.25); }
+[data-theme="dark"] .hero-desc { color: #9aa5ce; }
+[data-theme="dark"] .hero-proof-item { color: #9aa5ce; }
+[data-theme="dark"] .mockup-card { background: #1e2445; border-color: #30344e; }
+[data-theme="dark"] .mockup-bar { background: #252845; border-bottom-color: #30344e; }
+[data-theme="dark"] .m-title { color: #e2e8ff; }
+[data-theme="dark"] .m-stat { background: #252845; border-color: #30344e; }
+[data-theme="dark"] .m-account { background: #252845; border-color: #30344e; }
+[data-theme="dark"] .m-account-name { color: #e2e8ff; }
+[data-theme="dark"] .m-account-val { color: #e2e8ff; }
+[data-theme="dark"] .mockup-float { background: #1e2445; border-color: #30344e; }
+[data-theme="dark"] .float-label { color: #e2e8ff; }
+[data-theme="dark"] .float-sub { color: #9aa5ce; }
+[data-theme="dark"] .section-alt { background: #16213e; }
+[data-theme="dark"] .section-head h2 { color: #e2e8ff; }
+[data-theme="dark"] .section-head p { color: #9aa5ce; }
+[data-theme="dark"] .feat-card { background: #252845; border-color: #30344e; }
+[data-theme="dark"] .feat-card h3 { color: #e2e8ff; }
+[data-theme="dark"] .feat-card p { color: #9aa5ce; }
+[data-theme="dark"] .pricing-section { background: #1a1a2e; border-top-color: #30344e; }
+[data-theme="dark"] .price-card { background: #16213e; border-color: #30344e; }
+[data-theme="dark"] .price-card-header h3 { color: #e2e8ff; }
+[data-theme="dark"] .price-card-header p { color: #9aa5ce; }
+[data-theme="dark"] .price-features li { border-bottom-color: #30344e; color: #9aa5ce; }
+[data-theme="dark"] .public-footer, [data-theme="dark"] footer { background: #0d1020; }
+[data-theme="dark"] .footer-brand p { color: #7b8ab4; }
+[data-theme="dark"] .footer-col h4 { color: #e2e8ff; }
+[data-theme="dark"] .footer-col a { color: #7b8ab4; }
+[data-theme="dark"] .footer-col a:hover { color: #fff; }
+[data-theme="dark"] .footer-bottom { color: #7b8ab4; }
+
+/* Dark mode toggle button (landing) */
+.lp-dark-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 50px;
+    border: 1px solid rgba(141,43,92,.25);
+    background: var(--white);
+    color: var(--dark);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+.lp-dark-toggle:hover {
+    background: rgba(141,43,92,.08);
+    color: var(--wine);
+    border-color: var(--wine);
+}
+[data-theme="dark"] .lp-dark-toggle {
+    background: #252845;
+    border-color: #30344e;
+    color: #e2e8ff;
+}
+[data-theme="dark"] .lp-dark-toggle:hover {
+    background: #30344e;
+    color: #f252a1;
+}
 </style>
 </head>
 <body>
@@ -293,6 +379,10 @@ a { text-decoration: none; color: inherit; }
             <a href="#pricing">Tarifs</a>
         </div>
         <div class="lp-ctas">
+            <button id="lpDarkToggle" class="lp-dark-toggle" aria-label="Basculer mode sombre" title="Mode sombre">
+                <svg id="lpDmIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span id="lpDmText">Sombre</span>
+            </button>
             <?php if (isLoggedIn()): ?>
                 <a href="index.php" class="btn btn-primary">Mon Dashboard</a>
             <?php else: ?>
@@ -589,5 +679,45 @@ a { text-decoration: none; color: inherit; }
     </div>
 </footer>
 
+<script>
+(function() {
+    var html = document.documentElement;
+    var toggle = document.getElementById('lpDarkToggle');
+    var icon   = document.getElementById('lpDmIcon');
+    var text   = document.getElementById('lpDmText');
+    var STORAGE = 'budgie-theme';
+
+    function applyTheme(isDark) {
+        html.setAttribute('data-theme', isDark ? 'dark' : '');
+        if (isDark) {
+            if (icon) {
+                icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.removeAttribute('fill');
+                icon.setAttribute('stroke', 'currentColor');
+            }
+            if (text) text.textContent = 'Clair';
+        } else {
+            if (icon) {
+                icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.setAttribute('fill', 'currentColor');
+                icon.removeAttribute('stroke');
+            }
+            if (text) text.textContent = 'Sombre';
+        }
+    }
+
+    applyTheme(localStorage.getItem(STORAGE) === 'dark');
+
+    if (toggle) {
+        toggle.addEventListener('click', function() {
+            var isDark = html.getAttribute('data-theme') !== 'dark';
+            localStorage.setItem(STORAGE, isDark ? 'dark' : 'light');
+            applyTheme(isDark);
+        });
+    }
+})();
+</script>
 </body>
 </html>

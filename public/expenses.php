@@ -26,9 +26,14 @@ $user_accounts = fetchAll(
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Mes Dépenses</h3>
-            <button class="btn btn-primary" onclick="openModal('addExpenseModal')">
-                Ajouter une Dépense
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary" onclick="openModal('exportPdfModal')">
+                    📄 Exporter PDF
+                </button>
+                <button class="btn btn-primary" onclick="openModal('addExpenseModal')">
+                    Ajouter une Dépense
+                </button>
+            </div>
         </div>
 
         <!-- Filters -->

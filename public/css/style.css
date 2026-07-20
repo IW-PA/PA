@@ -1213,6 +1213,278 @@ body {
     .public-nav-links {
         display: none;
     }
+}/* ==========================================================================
+   Dark Mode — [data-theme="dark"]
+   ========================================================================== */
+
+[data-theme="dark"] {
+    --primary-color: #f252a1;
+    --primary-hover: #ff79c6;
+    --secondary-color: #44475a;
+    --success-color: #50fa7b;
+    --warning-color: #ffb86c;
+    --danger-color: #ff5555;
+    --light-bg: #1a1a2e;
+    --white: #16213e;
+    --gray-50: #1e2140;
+    --gray-100: #252845;
+    --gray-200: #30344e;
+    --gray-300: #44475a;
+    --gray-400: #6272a4;
+    --gray-500: #7b8ab4;
+    --gray-600: #9aa5ce;
+    --gray-700: #c8d0f0;
+    --gray-800: #e2e8ff;
+    --gray-900: #f8f8f2;
+    --shadow: 0 4px 10px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+    --text-muted: var(--gray-500);
 }
 
+/* Body & layout */
+[data-theme="dark"] body {
+    color: var(--gray-800);
+    background-color: var(--light-bg);
+}
+
+/* Sidebar */
+[data-theme="dark"] .sidebar {
+    background: var(--white);
+    border-right-color: var(--gray-200);
+}
+
+[data-theme="dark"] .nav-brand {
+    border-bottom-color: var(--gray-200);
+}
+
+[data-theme="dark"] .nav-link:hover {
+    background: var(--gray-100);
+    color: var(--primary-color);
+}
+
+/* Header */
+[data-theme="dark"] .header {
+    background: var(--white);
+    border-bottom-color: var(--gray-200);
+}
+
+[data-theme="dark"] .header h2 {
+    color: var(--gray-800);
+}
+
+/* Cards */
+[data-theme="dark"] .card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .chart-container {
+    background: var(--white);
+    box-shadow: var(--shadow);
+}
+
+[data-theme="dark"] .card-header {
+    border-bottom-color: var(--gray-200);
+}
+
+[data-theme="dark"] .card-title {
+    color: var(--gray-800);
+}
+
+/* Tables */
+[data-theme="dark"] .table-container {
+    background: var(--white);
+}
+
+[data-theme="dark"] .table th {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+[data-theme="dark"] .table th,
+[data-theme="dark"] .table td {
+    border-bottom-color: var(--gray-200);
+    color: var(--gray-800);
+}
+
+[data-theme="dark"] .table tbody tr:hover {
+    background: var(--gray-50);
+}
+
+/* Forms */
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .filter-input {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+    color: var(--gray-800);
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(242, 82, 161, 0.2);
+}
+
+[data-theme="dark"] .form-label {
+    color: var(--gray-700);
+}
+
+/* Buttons */
+[data-theme="dark"] .btn-secondary {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: var(--gray-300);
+    color: var(--gray-900);
+}
+
+/* Modals */
+[data-theme="dark"] .modal-content {
+    background: var(--white);
+    box-shadow: var(--shadow-lg);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--gray-200);
+}
+
+[data-theme="dark"] .modal-title {
+    color: var(--gray-800);
+}
+
+/* Auth pages */
+[data-theme="dark"] .auth-container {
+    background: var(--white);
+}
+
+[data-theme="dark"] .auth-layout {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 35%, #7b1fa2 75%, #6a0f5a 100%);
+}
+
+/* Alert messages */
+[data-theme="dark"] .alert-success {
+    background: #065f46;
+    color: #6ee7b7;
+    border-color: #10b981;
+}
+
+[data-theme="dark"] .alert-danger {
+    background: #7f1d1d;
+    color: #fca5a5;
+    border-color: #ef4444;
+}
+
+[data-theme="dark"] .alert-warning {
+    background: #78350f;
+    color: #fde68a;
+    border-color: #f59e0b;
+}
+
+[data-theme="dark"] .alert-info {
+    background: #1e3a5f;
+    color: #93c5fd;
+    border-color: #3b82f6;
+}
+
+/* Subscription plan cards */
+[data-theme="dark"] .plan-card,
+[data-theme="dark"] .pricing-card {
+    background: var(--white);
+    border-color: var(--gray-200);
+}
+
+/* Landing page */
+[data-theme="dark"] .public-navbar {
+    background: rgba(22, 33, 62, 0.96);
+    border-bottom-color: var(--gray-200);
+}
+
+[data-theme="dark"] .public-nav-links a {
+    color: var(--gray-600);
+}
+
+[data-theme="dark"] .hero-section {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1e213d 45%, #2a1040 100%);
+    border-bottom-color: var(--gray-200);
+}
+
+[data-theme="dark"] .hero-badge {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+}
+
+[data-theme="dark"] .features-section {
+    background: var(--white);
+}
+
+[data-theme="dark"] .feature-card {
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+}
+
+[data-theme="dark"] .security-section {
+    background: var(--white);
+}
+
+[data-theme="dark"] .pricing-section {
+    background: var(--light-bg);
+    border-top-color: var(--gray-200);
+}
+
+[data-theme="dark"] .pricing-features-list li {
+    border-bottom-color: var(--gray-200);
+    color: var(--gray-700);
+}
+
+[data-theme="dark"] .preview-card {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+}
+
+[data-theme="dark"] .preview-header {
+    background: var(--gray-200);
+    border-bottom-color: var(--gray-300);
+}
+
+[data-theme="dark"] .preview-stat-card,
+[data-theme="dark"] .account-preview-item {
+    background: var(--gray-200);
+    border-color: var(--gray-300);
+}
+
+/* Dark mode toggle button */
+.dark-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 50px;
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    color: var(--gray-700);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode-toggle:hover {
+    background: var(--gray-100);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .dark-mode-toggle {
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+    color: var(--gray-800);
+}
+
+[data-theme="dark"] .dark-mode-toggle:hover {
+    background: var(--gray-200);
+    color: var(--primary-color);
+}
 

@@ -77,9 +77,19 @@ include SRC_PATH . '/includes/header.php';
 
 <div class="container">
     <!-- Welcome Section -->
-    <div class="card">
-        <h2>Bienvenue, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Utilisateur'); ?> !</h2>
-        <p class="text-muted">Voici un aperçu de votre situation financière.</p>
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="margin-bottom: 0.25rem;">Bienvenue, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Utilisateur'); ?> !</h2>
+            <p class="text-muted" style="margin-bottom: 0;">Voici un aperçu de votre situation financière.</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button class="btn btn-secondary" onclick="openModal('exportPdfModal')">
+                📄 Exporter PDF
+            </button>
+            <a href="accounts.php" class="btn btn-primary">
+                + Gérer les comptes
+            </a>
+        </div>
     </div>
 
     <!-- Stats Cards -->
