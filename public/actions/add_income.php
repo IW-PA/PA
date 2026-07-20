@@ -94,6 +94,12 @@ try {
     ]);
 
     if ($incomeId) {
+        // Update account balance
+        executeQuery(
+            "UPDATE accounts SET balance = balance + ? WHERE id = ?",
+            [$amount, $account_id]
+        );
+
         ActivityLogger::log(
             (int) $_SESSION['user_id'],
             'income.create',

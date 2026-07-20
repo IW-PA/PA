@@ -29,7 +29,7 @@ include SRC_PATH . '/includes/header.php';
 <div class="auth-layout">
     <div class="auth-container">
         <div class="text-center mb-4">
-            <h1 style="color: var(--primary-color); margin-bottom: 0.5rem;">🔒 Nouveau mot de passe</h1>
+            <h1 style="color: var(--primary-color); margin-bottom: 0.5rem;">Nouveau mot de passe</h1>
             <p class="text-muted">Créez un nouveau mot de passe pour votre compte</p>
         </div>
 

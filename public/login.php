@@ -32,7 +32,7 @@ include SRC_PATH . '/includes/header.php';
 
             <?php if (APP_ENV === 'development' && isset($_SESSION['dev_reset_link'])): ?>
             <div style="background: #fef3c7; border: 1px solid #fbbf24; padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem;">
-                <strong style="color: #92400e;">🔧 Mode Développement</strong>
+                <strong style="color: #92400e;">Mode Développement</strong>
                 <p style="font-size: 0.875rem; margin: 0.5rem 0 0 0; color: #92400e;">
                     Lien de réinitialisation : <a href="<?php echo htmlspecialchars($_SESSION['dev_reset_link']); ?>" style="color: #2563eb;">Cliquez ici</a>
                 </p>

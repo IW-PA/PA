@@ -7,7 +7,7 @@ include SRC_PATH . '/includes/header.php';
 <div class="container" style="max-width: 900px;">
     <div class="card">
         <div class="card-header">
-            <h1 style="font-size: 2rem; margin: 0;">📜 Conditions d'utilisation</h1>
+            <h1 style="font-size: 2rem; margin: 0;">Conditions d'utilisation</h1>
             <p style="color: var(--gray-600); margin: 0.5rem 0 0 0;">Dernière mise à jour : <?php echo date('d/m/Y'); ?></p>
         </div>
 

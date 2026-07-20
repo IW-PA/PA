@@ -145,7 +145,7 @@ emailInput.addEventListener('blur', function() {
 
     // Check for disposable email
     if (disposableDomains.some(d => domain.includes(d))) {
-        alert('⚠️ Les adresses email temporaires ne sont pas autorisées.');
+        alert('Les adresses email temporaires ne sont pas autorisées.');
         this.value = '';
         return;
     }

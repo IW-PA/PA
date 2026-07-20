@@ -59,7 +59,7 @@ $user_data = [
             </div>
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="submit" class="btn btn-primary">
-                    <span>💾</span> Mettre à jour
+                    Mettre à jour
                 </button>
             </div>
         </form>
@@ -85,7 +85,7 @@ $user_data = [
             </div>
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="submit" class="btn btn-primary">
-                    <span>🔒</span> Changer le mot de passe
+                    Changer le mot de passe
                 </button>
             </div>
         </form>
@@ -96,7 +96,7 @@ $user_data = [
         <div class="card-header">
             <h3 class="card-title">Abonnement Actuel</h3>
             <a href="subscriptions.php" class="btn btn-secondary">
-                <span>⭐</span> Gérer l'abonnement
+                Gérer l'abonnement
             </a>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
@@ -120,12 +120,12 @@ $user_data = [
         
         <?php if ($user_data['subscription'] === 'Gratuit'): ?>
         <div style="margin-top: 1.5rem; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
-            <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🚀 Passez au plan Payant</h4>
+            <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Passez au plan Payant</h4>
             <p style="color: var(--gray-600); margin-bottom: 1rem;">
                 Débloquez toutes les fonctionnalités avec un abonnement illimité !
             </p>
             <a href="subscriptions.php" class="btn btn-primary">
-                <span>⭐</span> Voir les Plans
+                Voir les Plans
             </a>
         </div>
         <?php endif; ?>
@@ -163,7 +163,7 @@ $user_data = [
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
             <div>
-                <h4>🔍 Activité Récente</h4>
+                <h4>Activité Récente</h4>
                 <p style="color: var(--gray-600); margin-bottom: 0.5rem;">
                     <strong>Dernière connexion :</strong><br>
                     <?php echo $user_data['last_login'] !== 'Jamais' ? formatDate($user_data['last_login'], 'd/m/Y à H:i') : 'Première connexion'; ?>
@@ -173,12 +173,12 @@ $user_data = [
                 </p>
             </div>
             <div>
-                <h4>🛡️ Sessions Actives</h4>
+                <h4>Sessions Actives</h4>
                 <p style="color: var(--gray-600); margin-bottom: 1rem;">
                     Gérez les sessions actives sur vos différents appareils.
                 </p>
                 <button class="btn btn-secondary" onclick="alert('Vous pouvez voir toutes vos sessions actives et les révoquer si nécessaire.')">
-                    <span>👁️</span> Voir les Sessions
+                    Voir les Sessions
                 </button>
             </div>
         </div>
@@ -190,12 +190,12 @@ $user_data = [
             <h3 class="card-title" style="color: var(--danger-color);">Zone de Danger</h3>
         </div>
         <div>
-            <h4 style="color: var(--danger-color); margin-bottom: 0.5rem;">🗑️ Supprimer le Compte</h4>
+            <h4 style="color: var(--danger-color); margin-bottom: 0.5rem;">Supprimer le Compte</h4>
             <p style="color: var(--gray-600); margin-bottom: 1rem;">
                 Cette action est irréversible. Toutes vos données seront définitivement supprimées.
             </p>
             <button class="btn btn-danger" onclick="if(confirm('Êtes-vous ABSOLUMENT sûr de vouloir supprimer votre compte ? Cette action est irréversible !')) { alert('Fonctionnalité à venir'); }">
-                <span>🗑️</span> Supprimer le Compte
+                Supprimer le Compte
             </button>
         </div>
     </div>

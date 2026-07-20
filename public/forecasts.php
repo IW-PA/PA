@@ -51,7 +51,7 @@ include SRC_PATH . '/includes/header.php';
                 </div>
                 <div style="align-self: flex-end;">
                     <button type="submit" class="btn btn-primary">
-                        <span>🔮</span> Calculer
+                        Calculer
                     </button>
                 </div>
             </form>

@@ -7,7 +7,7 @@ include SRC_PATH . '/includes/header.php';
 <div class="auth-layout">
     <div class="auth-container">
         <div class="text-center mb-4">
-            <h1 style="color: var(--primary-color); margin-bottom: 0.5rem;">🔑 Réinitialisation</h1>
+            <h1 style="color: var(--primary-color); margin-bottom: 0.5rem;">Réinitialisation</h1>
             <p class="text-muted">Entrez votre email pour recevoir un lien de réinitialisation</p>
         </div>
 

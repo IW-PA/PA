@@ -27,7 +27,7 @@ $user_accounts = fetchAll(
         <div class="card-header">
             <h3 class="card-title">Mes Dépenses</h3>
             <button class="btn btn-primary" onclick="openModal('addExpenseModal')">
-                <span>➕</span> Ajouter une Dépense
+                Ajouter une Dépense
             </button>
         </div>
 
@@ -105,14 +105,14 @@ $user_accounts = fetchAll(
                                     <?php echo htmlspecialchars(json_encode($expense['start_date']), ENT_QUOTES); ?>,
                                     <?php echo htmlspecialchars(json_encode($expense['end_date'] ?? ''), ENT_QUOTES); ?>
                                 )">
-                                <span>✏️</span> Modifier
+                                Modifier
                             </button>
                             <form method="POST" action="actions/delete_expense.php" style="display:inline;"
                                   onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')">
                                 <?php echo CSRFProtection::getTokenField(); ?>
                                 <input type="hidden" name="expense_id" value="<?php echo $expense['id']; ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">
-                                    <span>🗑️</span> Supprimer
+                                    Supprimer
                                 </button>
                             </form>
                         </td>

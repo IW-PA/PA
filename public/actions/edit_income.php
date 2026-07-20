@@ -61,7 +61,7 @@ if (!empty($errors)) {
 try {
     // Verify income belongs to user
     $income = fetchOne(
-        "SELECT id FROM incomes WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
+        "SELECT id, amount, account_id FROM incomes WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
         [$income_id, $_SESSION['user_id']]
     );
 
@@ -97,6 +97,17 @@ try {
     );
 
     if ($updated !== false) {
+        // Reverse old income: subtract old amount from old account
+        executeQuery(
+            "UPDATE accounts SET balance = balance - ? WHERE id = ?",
+            [(float)$income['amount'], (int)$income['account_id']]
+        );
+        // Apply new income: add new amount to new account
+        executeQuery(
+            "UPDATE accounts SET balance = balance + ? WHERE id = ?",
+            [$amount, $account_id]
+        );
+
         ActivityLogger::log(
             (int) $_SESSION['user_id'],
             'income.update',

@@ -28,7 +28,7 @@ $user_accounts = fetchAll(
         <div class="card-header">
             <h3 class="card-title">Mes Revenus</h3>
             <button class="btn btn-primary" onclick="openModal('addIncomeModal')">
-                <span>➕</span> Ajouter un Revenu
+                Ajouter un Revenu
             </button>
         </div>
 
@@ -106,14 +106,14 @@ $user_accounts = fetchAll(
                                     <?php echo htmlspecialchars(json_encode($income['start_date']), ENT_QUOTES); ?>,
                                     <?php echo htmlspecialchars(json_encode($income['end_date'] ?? ''), ENT_QUOTES); ?>
                                 )">
-                                <span>✏️</span> Modifier
+                                Modifier
                             </button>
                             <form method="POST" action="actions/delete_income.php" style="display:inline;"
                                   onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce revenu ?')">
                                 <?php echo CSRFProtection::getTokenField(); ?>
                                 <input type="hidden" name="income_id" value="<?php echo $income['id']; ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">
-                                    <span>🗑️</span> Supprimer
+                                    Supprimer
                                 </button>
                             </form>
                         </td>

@@ -45,7 +45,7 @@ try {
     }
 
 } catch (Exception $e) {
-    echo "❌ Error: " . $e->getMessage() . "\n";
+    echo "Error: " . $e->getMessage() . "\n";
 }
 echo "</pre>\n";
 ?>

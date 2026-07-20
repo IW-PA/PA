@@ -14,7 +14,7 @@ ini_set('display_startup_errors', 1);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔧 Budgie - Test Configuration</title>
+    <title>Budgie - Test Configuration</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -65,7 +65,7 @@ ini_set('display_startup_errors', 1);
     echo '<div class="test ' . (version_compare(PHP_VERSION, '8.0.0', '>=') ? 'success' : 'error') . '">';
     echo '<strong>✓ PHP Version:</strong> ' . PHP_VERSION;
     if (version_compare(PHP_VERSION, '8.0.0', '<')) {
-        echo ' <span style="color: #ef4444;">❌ Minimum requis: PHP 8.0</span>';
+        echo ' <span style="color: #ef4444;">Minimum requis: PHP 8.0</span>';
         $errors[] = 'PHP version trop ancienne';
     } else {
         $successes[] = 'PHP version OK';
@@ -78,7 +78,7 @@ ini_set('display_startup_errors', 1);
         echo '<div class="test ' . (extension_loaded($ext) ? 'success' : 'error') . '">';
         echo '<strong>' . ($extension_loaded($ext) ? '✓' : '✗') . ' Extension PHP:</strong> ' . $ext;
         if (!extension_loaded($ext)) {
-            echo ' <span style="color: #ef4444;">❌ Manquante</span>';
+            echo ' <span style="color: #ef4444;">Manquante</span>';
             $errors[] = "Extension $ext manquante";
         } else {
             $successes[] = "Extension $ext OK";
@@ -126,8 +126,8 @@ ini_set('display_startup_errors', 1);
             $successes[] = 'Tables DB OK';
         } else {
             echo 'warning">';
-            echo '<strong>⚠ Tables de la Base:</strong> Tables manquantes : ' . implode(', ', $missingTables);
-            echo '<br><small>💡 Importez <code>database/schema.sql</code> dans phpMyAdmin</small>';
+            echo '<strong>[!] Tables de la Base:</strong> Tables manquantes : ' . implode(', ', $missingTables);
+            echo '<br><small>Importez <code>database/schema.sql</code> dans phpMyAdmin</small>';
             $warnings[] = 'Tables manquantes - importer schema.sql';
         }
         
@@ -149,16 +149,16 @@ ini_set('display_startup_errors', 1);
     $uploadDir = __DIR__ . '/public/uploads';
     echo '<div class="test ' . (is_writable($uploadDir) || !file_exists($uploadDir) ? 'success' : 'warning') . '">';
     if (file_exists($uploadDir)) {
-        echo '<strong>' . (is_writable($uploadDir) ? '✓' : '⚠') . ' Permissions Écriture:</strong> ';
+        echo '<strong>' . (is_writable($uploadDir) ? '✓' : '!') . ' Permissions Écriture:</strong> ';
         echo is_writable($uploadDir) ? 'OK' : 'Lecture seule (peut causer des problèmes)';
     } else {
-        echo '<strong>⚠ Dossier uploads:</strong> N\'existe pas encore (sera créé automatiquement)';
+        echo '<strong>[!] Dossier uploads:</strong> N\'existe pas encore (sera créé automatiquement)';
     }
     echo '</div>';
 
     // Test 7: Sessions
     echo '<div class="test ' . (session_status() === PHP_SESSION_ACTIVE ? 'success' : 'warning') . '">';
-    echo '<strong>' . (session_status() === PHP_SESSION_ACTIVE ? '✓' : '⚠') . ' Sessions PHP:</strong> ';
+    echo '<strong>' . (session_status() === PHP_SESSION_ACTIVE ? '✓' : '!') . ' Sessions PHP:</strong> ';
     echo session_status() === PHP_SESSION_ACTIVE ? 'Actives' : 'Inactives';
     if (session_status() === PHP_SESSION_ACTIVE) {
         $successes[] = 'Sessions OK';
@@ -169,7 +169,7 @@ ini_set('display_startup_errors', 1);
     echo '<div class="test ' . (function_exists('apache_get_modules') && in_array('mod_rewrite', apache_get_modules()) ? 'success' : 'warning') . '">';
     if (function_exists('apache_get_modules')) {
         $hasRewrite = in_array('mod_rewrite', apache_get_modules());
-        echo '<strong>' . ($hasRewrite ? '✓' : '⚠') . ' Apache mod_rewrite:</strong> ';
+        echo '<strong>' . ($hasRewrite ? '✓' : '!') . ' Apache mod_rewrite:</strong> ';
         echo $hasRewrite ? 'Activé' : 'Non détecté (peut causer des problèmes de routing)';
         if ($hasRewrite) {
             $successes[] = 'mod_rewrite OK';
@@ -177,20 +177,20 @@ ini_set('display_startup_errors', 1);
             $warnings[] = 'mod_rewrite à vérifier';
         }
     } else {
-        echo '<strong>⚠ Apache mod_rewrite:</strong> Impossible à détecter (fonction apache_get_modules non disponible)';
+        echo '<strong>[!] Apache mod_rewrite:</strong> Impossible à détecter (fonction apache_get_modules non disponible)';
     }
     echo '</div>';
 
     // Summary
     echo '<div style="background: white; padding: 20px; margin-top: 20px; border-radius: 8px;">';
-    echo '<h2>📊 Résumé</h2>';
+    echo '<h2>Résumé</h2>';
     echo '<p><strong style="color: #10b981;">✓ Succès:</strong> ' . count($successes) . '</p>';
-    echo '<p><strong style="color: #f59e0b;">⚠ Avertissements:</strong> ' . count($warnings) . '</p>';
+    echo '<p><strong style="color: #f59e0b;">[!] Avertissements:</strong> ' . count($warnings) . '</p>';
     echo '<p><strong style="color: #ef4444;">✗ Erreurs:</strong> ' . count($errors) . '</p>';
     
     if (empty($errors) && count($warnings) <= 1) {
         echo '<hr>';
-        echo '<p style="font-size: 1.2em; color: #10b981;"><strong>🎉 Installation réussie !</strong></p>';
+        echo '<p style="font-size: 1.2em; color: #10b981;"><strong>Installation réussie !</strong></p>';
         echo '<p>Vous pouvez maintenant accéder à l\'application :</p>';
         echo '<ul>';
         echo '<li><a href="index.php" style="color: #2563eb;">Page d\'accueil</a></li>';
@@ -199,7 +199,7 @@ ini_set('display_startup_errors', 1);
         echo '</ul>';
     } else {
         echo '<hr>';
-        echo '<p style="color: #ef4444;"><strong>⚠️ Problèmes détectés</strong></p>';
+        echo '<p style="color: #ef4444;"><strong>Problèmes détectés</strong></p>';
         echo '<p>Veuillez résoudre les erreurs ci-dessus avant d\'utiliser l\'application.</p>';
         echo '<p><strong>Consultez le guide:</strong> <code>WAMP_SETUP.md</code></p>';
     }
@@ -207,7 +207,7 @@ ini_set('display_startup_errors', 1);
     ?>
 
     <div style="background: #f1f5f9; padding: 15px; margin-top: 20px; border-radius: 8px; font-size: 0.9em;">
-        <strong>📚 Ressources :</strong>
+        <strong>Ressources :</strong>
         <ul>
             <li><a href="WAMP_SETUP.md">Guide d'installation WAMP</a></li>
             <li><a href="http://localhost/phpmyadmin" target="_blank">phpMyAdmin</a></li>

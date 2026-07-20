@@ -17,7 +17,7 @@ $accounts = fetchAll(
         <div class="card-header">
             <h3 class="card-title">Mes Comptes</h3>
             <button class="btn btn-primary" onclick="openModal('addAccountModal')">
-                <span>➕</span> Ajouter un Compte
+                Ajouter un Compte
             </button>
         </div>
 
@@ -60,14 +60,14 @@ $accounts = fetchAll(
                                     <?php echo $account['interest_rate']; ?>,
                                     <?php echo $account['tax_rate']; ?>
                                 )">
-                                <span>✏️</span> Modifier
+                                Modifier
                             </button>
                             <form method="POST" action="actions/delete_account.php" style="display:inline;"
                                   onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.')">
                                 <?php echo CSRFProtection::getTokenField(); ?>
                                 <input type="hidden" name="account_id" value="<?php echo $account['id']; ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">
-                                    <span>🗑️</span> Supprimer
+                                    Supprimer
                                 </button>
                             </form>
                         </td>

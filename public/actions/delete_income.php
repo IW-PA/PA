@@ -24,7 +24,7 @@ if ($income_id <= 0) {
 try {
     // Verify income belongs to user
     $income = fetchOne(
-        "SELECT id, name FROM incomes WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
+        "SELECT id, name, amount, account_id FROM incomes WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
         [$income_id, $_SESSION['user_id']]
     );
 
@@ -34,10 +34,17 @@ try {
     }
 
     // Soft delete
-    executeQuery(
+    $updated = executeQuery(
         "UPDATE incomes SET deleted_at = NOW() WHERE id = ? AND user_id = ?",
         [$income_id, $_SESSION['user_id']]
     );
+
+    if ($updated) {
+        executeQuery(
+            "UPDATE accounts SET balance = balance - ? WHERE id = ?",
+            [(float)$income['amount'], (int)$income['account_id']]
+        );
+    }
 
     ActivityLogger::log(
         (int) $_SESSION['user_id'],

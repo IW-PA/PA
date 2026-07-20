@@ -41,22 +41,22 @@ echo "<!DOCTYPE html>
 $migrationFile = __DIR__ . '/migrations/add_admin_role.sql';
 
 if (!file_exists($migrationFile)) {
-    echo "<p class='error'>❌ Migration file not found: {$migrationFile}</p>";
+    echo "<p class='error'>Migration file not found: {$migrationFile}</p>";
     echo "</body></html>";
     exit;
 }
 
-echo "<p class='info'>📄 Reading migration file...</p>";
+echo "<p class='info'>Reading migration file...</p>";
 
 $sql = file_get_contents($migrationFile);
 
 if (!$sql) {
-    echo "<p class='error'>❌ Failed to read migration file</p>";
+    echo "<p class='error'>Failed to read migration file</p>";
     echo "</body></html>";
     exit;
 }
 
-echo "<p class='info'>🔧 Running migration...</p>";
+echo "<p class='info'>Running migration...</p>";
 echo "<pre>";
 
 try {
@@ -107,7 +107,7 @@ try {
     }
     
     echo "</pre>";
-    echo "<h2 class='success'>✅ Migration Complete!</h2>";
+    echo "<h2 class='success'>Migration Complete!</h2>";
     echo "<p class='info'>Executed: {$successCount} statements</p>";
     
     if ($errorCount > 0) {
@@ -115,7 +115,7 @@ try {
     }
     
     // Verify admin user
-    echo "<h3>🔍 Verification:</h3>";
+    echo "<h3>Verification:</h3>";
     echo "<pre>";
     
     $adminCheck = $pdo->query("SELECT email, role, status FROM users WHERE role = 'admin' LIMIT 5");
@@ -149,7 +149,7 @@ try {
     
     echo "</pre>";
     
-    echo "<h3>🚀 Next Steps:</h3>";
+    echo "<h3>Next Steps:</h3>";
     echo "<ol>";
     echo "<li>Login with admin credentials: <a href='../public/login.php'>Login Page</a></li>";
     echo "<li>Access admin panel: <a href='../public/admin.php'>Admin Panel</a></li>";
@@ -158,7 +158,7 @@ try {
     
 } catch (Exception $e) {
     echo "</pre>";
-    echo "<h2 class='error'>❌ Migration Failed</h2>";
+    echo "<h2 class='error'>Migration Failed</h2>";
     echo "<pre class='error'>" . htmlspecialchars($e->getMessage()) . "</pre>";
     echo "<p>Check your database connection and try again.</p>";
 }

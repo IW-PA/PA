@@ -67,7 +67,7 @@ $recent_shares = fetchAll(
             </div>
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="submit" class="btn btn-primary">
-                    <span>📧</span> Envoyer l'Invitation
+                    Envoyer l'Invitation
                 </button>
             </div>
         </form>
@@ -107,10 +107,10 @@ $recent_shares = fetchAll(
                         </td>
                         <td>
                             <button class="btn btn-sm btn-secondary" onclick="openModal('editShareModal', <?php echo $share['id']; ?>)">
-                                <span>✏️</span> Modifier
+                                Modifier
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir révoquer l\'accès ?')) { revokeAccess(<?php echo $share['id']; ?>); }">
-                                <span>🚫</span> Révoquer
+                                Révoquer
                             </button>
                         </td>
                     </tr>
@@ -149,7 +149,7 @@ $recent_shares = fetchAll(
                         <td><?php echo formatDate($share['shared_at']); ?></td>
                         <td>
                             <a href="shared_account_details.php?id=<?php echo $share['account_id']; ?>" class="btn btn-sm btn-primary">
-                                <span>👁️</span> Consulter
+                                Consulter
                             </a>
                         </td>
                     </tr>
@@ -163,34 +163,34 @@ $recent_shares = fetchAll(
     <!-- Sharing Guidelines -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">📋 Règles de Partage</h3>
+            <h3 class="card-title">Règles de Partage</h3>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
             <div>
-                <h4>✅ Ce qui est autorisé</h4>
+                <h4>Ce qui est autorisé</h4>
                 <ul style="list-style: none; padding: 0;">
-                    <li>📊 Consultation des soldes</li>
-                    <li>📈 Visualisation des transactions</li>
-                    <li>📋 Accès aux prévisions</li>
-                    <li>📧 Notifications par email</li>
+                    <li>Consultation des soldes</li>
+                    <li>Visualisation des transactions</li>
+                    <li>Accès aux prévisions</li>
+                    <li>Notifications par email</li>
                 </ul>
             </div>
             <div>
-                <h4>❌ Ce qui est interdit</h4>
+                <h4>Ce qui est interdit</h4>
                 <ul style="list-style: none; padding: 0;">
-                    <li>✏️ Modification des données</li>
-                    <li>➕ Ajout de transactions</li>
-                    <li>🗑️ Suppression d'éléments</li>
-                    <li>⚙️ Modification des paramètres</li>
+                    <li>Modification des données</li>
+                    <li>Ajout de transactions</li>
+                    <li>Suppression d'éléments</li>
+                    <li>Modification des paramètres</li>
                 </ul>
             </div>
             <div>
-                <h4>🔒 Sécurité</h4>
+                <h4>Sécurité</h4>
                 <ul style="list-style: none; padding: 0;">
-                    <li>🔐 Accès en lecture seule uniquement</li>
-                    <li>📧 Invitation par email obligatoire</li>
-                    <li>⏰ Accès révocable à tout moment</li>
-                    <li>📝 Traçabilité des accès</li>
+                    <li>Accès en lecture seule uniquement</li>
+                    <li>Invitation par email obligatoire</li>
+                    <li>Accès révocable à tout moment</li>
+                    <li>Traçabilité des accès</li>
                 </ul>
             </div>
         </div>

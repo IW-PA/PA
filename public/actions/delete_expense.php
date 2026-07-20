@@ -24,7 +24,7 @@ if ($expense_id <= 0) {
 try {
     // Verify expense belongs to user
     $expense = fetchOne(
-        "SELECT id, name FROM expenses WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
+        "SELECT id, name, amount, account_id FROM expenses WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
         [$expense_id, $_SESSION['user_id']]
     );
 
@@ -38,6 +38,13 @@ try {
         "UPDATE expenses SET deleted_at = NOW() WHERE id = ? AND user_id = ?",
         [$expense_id, $_SESSION['user_id']]
     );
+
+    if ($updated) {
+        executeQuery(
+            "UPDATE accounts SET balance = balance + ? WHERE id = ?",
+            [(float)$expense['amount'], (int)$expense['account_id']]
+        );
+    }
 
     ActivityLogger::log(
         (int) $_SESSION['user_id'],

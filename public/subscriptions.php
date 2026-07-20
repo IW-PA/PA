@@ -210,28 +210,28 @@ $subscription_plans = [
                     </tr>
                     <tr>
                         <td><strong>Prévisions</strong></td>
-                        <td class="text-center">✅ Basiques</td>
-                        <td class="text-center text-success">✅ Avancées</td>
+                        <td class="text-center">Basiques</td>
+                        <td class="text-center text-success">Avancées</td>
                     </tr>
                     <tr>
                         <td><strong>Partage de comptes</strong></td>
-                        <td class="text-center">❌</td>
-                        <td class="text-center text-success">✅</td>
+                        <td class="text-center">✗</td>
+                        <td class="text-center text-success">✓</td>
                     </tr>
                     <tr>
                         <td><strong>Exports</strong></td>
-                        <td class="text-center">❌</td>
-                        <td class="text-center text-success">✅ Excel/PDF</td>
+                        <td class="text-center">✗</td>
+                        <td class="text-center text-success">✓ Excel/PDF</td>
                     </tr>
                     <tr>
                         <td><strong>Support</strong></td>
-                        <td class="text-center">📧 Email</td>
-                        <td class="text-center text-success">🚀 Prioritaire</td>
+                        <td class="text-center">Email</td>
+                        <td class="text-center text-success">Prioritaire</td>
                     </tr>
                     <tr>
                         <td><strong>API Access</strong></td>
-                        <td class="text-center">❌</td>
-                        <td class="text-center text-success">✅</td>
+                        <td class="text-center">✗</td>
+                        <td class="text-center text-success">✓</td>
                     </tr>
                 </tbody>
             </table>
@@ -270,7 +270,7 @@ $subscription_plans = [
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-secondary" onclick="downloadInvoice('<?php echo $payment['id']; ?>')">
-                                    <span>📄</span> Télécharger
+                                    Télécharger
                                 </button>
                             </td>
                         </tr>
@@ -289,13 +289,13 @@ $subscription_plans = [
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: var(--gray-100); border-radius: var(--border-radius);">
             <div>
-                <strong>💳 Abonnement Premium actif</strong>
+                <strong>Abonnement Premium actif</strong>
                 <p style="margin: 0; color: var(--gray-600);">Mettez à jour votre moyen de paiement, consultez vos factures ou résiliez via le portail sécurisé Stripe.</p>
             </div>
             <form method="POST" action="actions/customer_portal.php" style="margin:0;">
                 <?php echo CSRFProtection::getTokenField(); ?>
                 <button type="submit" class="btn btn-primary">
-                    <span>⚙️</span> Gérer / Résilier
+                    Gérer / Résilier
                 </button>
             </form>
         </div>
@@ -305,7 +305,7 @@ $subscription_plans = [
     <!-- FAQ -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">❓ Questions Fréquentes</h3>
+            <h3 class="card-title">Questions Fréquentes</h3>
         </div>
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
             <div>

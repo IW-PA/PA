@@ -88,7 +88,6 @@
 </head>
 <body>
     <div class="error-container">
-        <div class="error-icon">🚫</div>
         <div class="error-code">403</div>
         <h1 class="error-title">Access Denied</h1>
         <p class="error-message">

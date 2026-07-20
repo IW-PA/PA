@@ -61,7 +61,7 @@ if (!empty($errors)) {
 try {
     // Verify expense belongs to user
     $expense = fetchOne(
-        "SELECT id FROM expenses WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
+        "SELECT id, amount, account_id FROM expenses WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
         [$expense_id, $_SESSION['user_id']]
     );
 
@@ -97,6 +97,17 @@ try {
     );
 
     if ($updated !== false) {
+        // Reverse old expense: add old amount to old account
+        executeQuery(
+            "UPDATE accounts SET balance = balance + ? WHERE id = ?",
+            [(float)$expense['amount'], (int)$expense['account_id']]
+        );
+        // Apply new expense: subtract new amount from new account
+        executeQuery(
+            "UPDATE accounts SET balance = balance - ? WHERE id = ?",
+            [$amount, $account_id]
+        );
+
         ActivityLogger::log(
             (int) $_SESSION['user_id'],
             'expense.update',

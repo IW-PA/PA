@@ -75,7 +75,7 @@ include SRC_PATH . '/includes/header.php';
 <div class="container">
     <!-- Welcome Section -->
     <div class="card">
-        <h2>Bienvenue, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Utilisateur'); ?> ! 👋</h2>
+        <h2>Bienvenue, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Utilisateur'); ?> !</h2>
         <p class="text-muted">Voici un aperçu de votre situation financière.</p>
     </div>
 
@@ -128,16 +128,16 @@ include SRC_PATH . '/includes/header.php';
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
             <a href="accounts.php" class="btn btn-primary">
-                <span>💳</span> Gérer les Comptes
+                Gérer les Comptes
             </a>
             <a href="expenses.php" class="btn btn-secondary">
-                <span>💸</span> Ajouter une Dépense
+                Ajouter une Dépense
             </a>
             <a href="incomes.php" class="btn btn-secondary">
-                <span>💰</span> Ajouter un Revenu
+                Ajouter un Revenu
             </a>
             <a href="forecasts.php" class="btn btn-secondary">
-                <span>📊</span> Voir les Prévisions
+                Voir les Prévisions
             </a>
         </div>
     </div>

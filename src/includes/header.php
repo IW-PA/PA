@@ -31,7 +31,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <?php if (!in_array($current_page, ['login', 'signup'])): ?>
+    <?php if (!in_array($current_page, ['login', 'signup', 'forgot_password', 'reset_password'])): ?>
     <div class="main-layout">
         <!-- Sidebar -->
         <nav class="sidebar">
@@ -41,54 +41,54 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="index.php" class="nav-link <?php echo $current_page === 'index' ? 'active' : ''; ?>">
-                        <i>🏠</i> Dashboard
+                        Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="accounts.php" class="nav-link <?php echo $current_page === 'accounts' ? 'active' : ''; ?>">
-                        <i>💳</i> Comptes
+                        Comptes
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="expenses.php" class="nav-link <?php echo $current_page === 'expenses' ? 'active' : ''; ?>">
-                        <i>💸</i> Dépenses
+                        Dépenses
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="incomes.php" class="nav-link <?php echo $current_page === 'incomes' ? 'active' : ''; ?>">
-                        <i>💰</i> Revenus
+                        Revenus
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="forecasts.php" class="nav-link <?php echo $current_page === 'forecasts' ? 'active' : ''; ?>">
-                        <i>📊</i> Prévisions
+                        Prévisions
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="sharing.php" class="nav-link <?php echo $current_page === 'sharing' ? 'active' : ''; ?>">
-                        <i>🤝</i> Partage
+                        Partage
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="subscriptions.php" class="nav-link <?php echo $current_page === 'subscriptions' ? 'active' : ''; ?>">
-                        <i>⭐</i> Abonnements
+                        Abonnements
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="profile.php" class="nav-link <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
-                        <i>👤</i> Profil
+                        Profil
                     </a>
                 </li>
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li class="nav-item">
                     <a href="admin.php" class="nav-link <?php echo $current_page === 'admin' ? 'active' : ''; ?>">
-                        <i>⚙️</i> Administration
+                        Administration
                     </a>
                 </li>
                 <?php endif; ?>
                 <li class="nav-item">
                     <a href="logout.php" class="nav-link">
-                        <i>🚪</i> Déconnexion
+                        Déconnexion
                     </a>
                 </li>
             </ul>
@@ -104,7 +104,6 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 </div>
                 <div class="user-menu">
                     <div class="user-info">
-                        <span>👤</span>
                         <span><?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Utilisateur'; ?></span>
                     </div>
                 </div>

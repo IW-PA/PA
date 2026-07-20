@@ -65,13 +65,13 @@ include SRC_PATH . '/includes/header.php';
     <!-- Admin Header -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">👑 Panneau d'Administration</h3>
+            <h3 class="card-title">Panneau d'Administration</h3>
             <div style="display: flex; gap: 1rem;">
                 <button class="btn btn-success" onclick="openModal('addUserModal')">
-                    <span>➕</span> Ajouter un Utilisateur
+                    Ajouter un Utilisateur
                 </button>
                 <button class="btn btn-secondary" onclick="exportUsers()">
-                    <span>📊</span> Exporter les Données
+                    Exporter les Données
                 </button>
             </div>
         </div>
@@ -162,14 +162,13 @@ include SRC_PATH . '/includes/header.php';
                         <td><?php echo $user['last_login'] ? date('d/m/Y H:i', strtotime($user['last_login'])) : '—'; ?></td>
                         <td>
                             <button class="btn btn-sm btn-secondary" onclick="openModal('editUserModal')">
-                                <span>✏️</span> Modifier
+                                Modifier
                             </button>
                             <button class="btn btn-sm btn-warning" onclick="toggleUserStatus(<?php echo $user['id']; ?>)">
-                                <span><?php echo $user['status'] === 'active' ? '⏸️' : '▶️'; ?></span>
                                 <?php echo $user['status'] === 'active' ? 'Suspendre' : 'Activer'; ?>
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) { deleteUser(<?php echo $user['id']; ?>); }">
-                                <span>🗑️</span> Supprimer
+                                Supprimer
                             </button>
                         </td>
                     </tr>
@@ -233,7 +232,7 @@ include SRC_PATH . '/includes/header.php';
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
             <div>
-                <h4>📊 Base de Données</h4>
+                <h4>Base de Données</h4>
                 <ul style="list-style: none; padding: 0;">
                     <li>Utilisateurs : <?php echo $stats['total_users']; ?></li>
                     <li>Comptes : 3,456</li>
@@ -242,7 +241,7 @@ include SRC_PATH . '/includes/header.php';
                 </ul>
             </div>
             <div>
-                <h4>🖥️ Serveur</h4>
+                <h4>Serveur</h4>
                 <ul style="list-style: none; padding: 0;">
                     <li>PHP : 8.2.0</li>
                     <li>MySQL : 8.0.35</li>
@@ -251,12 +250,12 @@ include SRC_PATH . '/includes/header.php';
                 </ul>
             </div>
             <div>
-                <h4>🔒 Sécurité</h4>
+                <h4>Sécurité</h4>
                 <ul style="list-style: none; padding: 0;">
-                    <li>SSL : ✅ Actif</li>
-                    <li>Firewall : ✅ Actif</li>
-                    <li>Backups : ✅ Quotidien</li>
-                    <li>Monitoring : ✅ Actif</li>
+                    <li>SSL : Actif</li>
+                    <li>Firewall : Actif</li>
+                    <li>Backups : Quotidien</li>
+                    <li>Monitoring : Actif</li>
                 </ul>
             </div>
         </div>
