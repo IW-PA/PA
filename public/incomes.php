@@ -109,7 +109,7 @@ $user_accounts = fetchAll(
                                 Modifier
                             </button>
                             <form method="POST" action="actions/delete_income.php" style="display:inline;"
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce revenu ?')">
+                                  onsubmit="return confirmSubmit(event, 'Êtes-vous sûr de vouloir supprimer ce revenu ?', 'Suppression du revenu');">
                                 <?php echo CSRFProtection::getTokenField(); ?>
                                 <input type="hidden" name="income_id" value="<?php echo $income['id']; ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">

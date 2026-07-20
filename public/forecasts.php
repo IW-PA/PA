@@ -44,8 +44,8 @@ include SRC_PATH . '/includes/header.php';
                         name="target_month"
                         class="form-input"
                         value="<?php echo htmlspecialchars($selectedMonth); ?>"
-                        min="<?php echo date('Y-m'); ?>"
-                        max="<?php echo (new DateTime('+24 months'))->format('Y-m'); ?>"
+                        min="2020-01"
+                        max="2035-12"
                         required
                     >
                 </div>

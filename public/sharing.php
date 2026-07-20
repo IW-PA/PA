@@ -109,7 +109,7 @@ $recent_shares = fetchAll(
                             <button class="btn btn-sm btn-secondary" onclick="openModal('editShareModal', <?php echo $share['id']; ?>)">
                                 Modifier
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir révoquer l\'accès ?')) { revokeAccess(<?php echo $share['id']; ?>); }">
+                            <button class="btn btn-sm btn-danger" onclick="confirmRevokeAccess(<?php echo $share['id']; ?>)">
                                 Révoquer
                             </button>
                         </td>
@@ -249,10 +249,24 @@ $recent_shares = fetchAll(
 </div>
 
 <script>
+function confirmRevokeAccess(shareId) {
+    showConfirm({
+        title: 'Révoquer l\'accès',
+        message: 'Êtes-vous sûr de vouloir révoquer l\'accès à ce compte ?',
+        confirmText: 'Révoquer',
+        confirmBtnClass: 'btn-danger'
+    }, function() {
+        revokeAccess(shareId);
+    });
+}
+
 function revokeAccess(shareId) {
-    // AJAX call to revoke access
     console.log('Revoking access for share:', shareId);
-    alert('Accès révoqué avec succès');
+    showAlert({
+        title: 'Accès révoqué',
+        message: 'L\'accès au compte a été révoqué avec succès.',
+        type: 'success'
+    });
 }
 
 // Auto-refresh sharing activity every 30 seconds

@@ -43,6 +43,7 @@ $user_data = [
             <h3 class="card-title">Informations Personnelles</h3>
         </div>
         <form method="POST" action="actions/update_profile.php">
+            <?php echo CSRFProtection::getTokenField(); ?>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <div class="form-group">
                     <label for="first_name" class="form-label">Prénom</label>
@@ -71,6 +72,7 @@ $user_data = [
             <h3 class="card-title">Changer le Mot de Passe</h3>
         </div>
         <form method="POST" action="actions/change_password.php">
+            <?php echo CSRFProtection::getTokenField(); ?>
             <div class="form-group">
                 <label for="current_password" class="form-label">Mot de passe actuel</label>
                 <input type="password" id="current_password" name="current_password" class="form-input" required>
@@ -156,33 +158,6 @@ $user_data = [
         </div>
     </div>
 
-    <!-- Activity & Security -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Activité & Sécurité</h3>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-            <div>
-                <h4>Activité Récente</h4>
-                <p style="color: var(--gray-600); margin-bottom: 0.5rem;">
-                    <strong>Dernière connexion :</strong><br>
-                    <?php echo $user_data['last_login'] !== 'Jamais' ? formatDate($user_data['last_login'], 'd/m/Y à H:i') : 'Première connexion'; ?>
-                </p>
-                <p style="color: var(--gray-600); margin-bottom: 1rem;">
-                    <strong>Adresse IP :</strong> <?php echo $_SERVER['REMOTE_ADDR'] ?? 'N/A'; ?>
-                </p>
-            </div>
-            <div>
-                <h4>Sessions Actives</h4>
-                <p style="color: var(--gray-600); margin-bottom: 1rem;">
-                    Gérez les sessions actives sur vos différents appareils.
-                </p>
-                <button class="btn btn-secondary" onclick="alert('Vous pouvez voir toutes vos sessions actives et les révoquer si nécessaire.')">
-                    Voir les Sessions
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Danger Zone -->
     <div class="card" style="border: 2px solid var(--danger-color);">
@@ -194,11 +169,24 @@ $user_data = [
             <p style="color: var(--gray-600); margin-bottom: 1rem;">
                 Cette action est irréversible. Toutes vos données seront définitivement supprimées.
             </p>
-            <button class="btn btn-danger" onclick="if(confirm('Êtes-vous ABSOLUMENT sûr de vouloir supprimer votre compte ? Cette action est irréversible !')) { alert('Fonctionnalité à venir'); }">
+            <button class="btn btn-danger" onclick="deleteAccountPrompt()">
                 Supprimer le Compte
             </button>
         </div>
     </div>
 </div>
+
+<script>
+function deleteAccountPrompt() {
+    showConfirm({
+        title: 'Suppression du compte',
+        message: 'Êtes-vous ABSOLUMENT sûr de vouloir supprimer votre compte ? Cette action est irréversible !',
+        confirmText: 'Supprimer mon compte',
+        confirmBtnClass: 'btn-danger'
+    }, function() {
+        showAlert({ title: 'Information', message: 'Fonctionnalité de suppression définitive à venir.' });
+    });
+}
+</script>
 
 <?php include SRC_PATH . '/includes/footer.php'; ?>

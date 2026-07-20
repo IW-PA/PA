@@ -330,8 +330,10 @@ $subscription_plans = [
 
 <script>
 function downloadInvoice(date) {
-    // Invoices are available from the Stripe Customer Portal ("Gérer / Résilier").
-    alert('Vos factures sont disponibles dans le portail « Gérer mon Abonnement ».');
+    showAlert({
+        title: 'Factures disponibles',
+        message: 'Vos factures sont accessibles dans le portail « Gérer mon Abonnement ».'
+    });
 }
 </script>
 

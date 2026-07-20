@@ -63,7 +63,7 @@ $accounts = fetchAll(
                                 Modifier
                             </button>
                             <form method="POST" action="actions/delete_account.php" style="display:inline;"
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.')">
+                                  onsubmit="return confirmSubmit(event, 'Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.', 'Suppression du compte');">
                                 <?php echo CSRFProtection::getTokenField(); ?>
                                 <input type="hidden" name="account_id" value="<?php echo $account['id']; ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">

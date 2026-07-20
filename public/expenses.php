@@ -108,7 +108,7 @@ $user_accounts = fetchAll(
                                 Modifier
                             </button>
                             <form method="POST" action="actions/delete_expense.php" style="display:inline;"
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')">
+                                  onsubmit="return confirmSubmit(event, 'Êtes-vous sûr de vouloir supprimer cette dépense ?', 'Suppression de la dépense');">
                                 <?php echo CSRFProtection::getTokenField(); ?>
                                 <input type="hidden" name="expense_id" value="<?php echo $expense['id']; ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">

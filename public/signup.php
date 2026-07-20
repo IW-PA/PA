@@ -145,7 +145,11 @@ emailInput.addEventListener('blur', function() {
 
     // Check for disposable email
     if (disposableDomains.some(d => domain.includes(d))) {
-        alert('Les adresses email temporaires ne sont pas autorisées.');
+        showAlert({
+            title: 'Email temporaire non autorisé',
+            message: 'Les adresses email temporaires ne sont pas autorisées.',
+            type: 'error'
+        });
         this.value = '';
         return;
     }
@@ -164,9 +168,16 @@ emailInput.addEventListener('blur', function() {
     };
 
     if (suggestions[domain]) {
-        if (confirm(`Voulez-vous dire ${parts[0]}@${suggestions[domain]} ?`)) {
-            this.value = parts[0] + '@' + suggestions[domain];
-        }
+        const inputRef = this;
+        const suggestedEmail = parts[0] + '@' + suggestions[domain];
+        showConfirm({
+            title: 'Suggestion d\'adresse email',
+            message: `Voulez-vous remplacer par ${suggestedEmail} ?`,
+            confirmText: 'Corriger',
+            confirmBtnClass: 'btn-primary'
+        }, function() {
+            inputRef.value = suggestedEmail;
+        });
     }
 });
 </script>

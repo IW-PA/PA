@@ -167,7 +167,7 @@ include SRC_PATH . '/includes/header.php';
                             <button class="btn btn-sm btn-warning" onclick="toggleUserStatus(<?php echo $user['id']; ?>)">
                                 <?php echo $user['status'] === 'active' ? 'Suspendre' : 'Activer'; ?>
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) { deleteUser(<?php echo $user['id']; ?>); }">
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser(<?php echo $user['id']; ?>)">
                                 Supprimer
                             </button>
                         </td>
@@ -335,23 +335,42 @@ include SRC_PATH . '/includes/header.php';
 
 <script>
 function toggleUserStatus(userId) {
-    if (confirm('Êtes-vous sûr de vouloir changer le statut de cet utilisateur ?')) {
-        // AJAX call to toggle user status
+    showConfirm({
+        title: 'Changer le statut',
+        message: 'Êtes-vous sûr de vouloir modifier le statut de cet utilisateur ?',
+        confirmText: 'Changer',
+        confirmBtnClass: 'btn-warning'
+    }, function() {
         console.log('Toggling status for user:', userId);
-        alert('Statut de l\'utilisateur modifié');
-    }
+        showAlert({
+            title: 'Statut mis à jour',
+            message: 'Statut de l\'utilisateur modifié avec succès.',
+            type: 'success'
+        });
+    });
 }
 
 function deleteUser(userId) {
-    // AJAX call to delete user
-    console.log('Deleting user:', userId);
-    alert('Utilisateur supprimé');
+    showConfirm({
+        title: 'Supprimer l\'utilisateur',
+        message: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+        confirmText: 'Supprimer',
+        confirmBtnClass: 'btn-danger'
+    }, function() {
+        console.log('Deleting user:', userId);
+        showAlert({
+            title: 'Utilisateur supprimé',
+            message: 'L\'utilisateur a été supprimé avec succès.',
+            type: 'success'
+        });
+    });
 }
 
 function exportUsers() {
-    // Export users data
-    console.log('Exporting users data');
-    alert('Export en cours...');
+    showAlert({
+        title: 'Exportation en cours',
+        message: 'L\'exportation des données utilisateurs a été démarrée.'
+    });
 }
 </script>
 

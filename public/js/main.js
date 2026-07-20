@@ -81,7 +81,7 @@ function initMobileMenu() {
         mobileMenuBtn.addEventListener('click', function() {
             sidebar.classList.toggle('open');
             if (overlay) {
-                overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+                overlay.classList.toggle('active', sidebar.classList.contains('open'));
             }
         });
     }
@@ -89,7 +89,7 @@ function initMobileMenu() {
     if (overlay) {
         overlay.addEventListener('click', function() {
             sidebar.classList.remove('open');
-            this.style.display = 'none';
+            this.classList.remove('active');
         });
     }
 }
@@ -188,24 +188,117 @@ function formatNumber(number) {
     return new Intl.NumberFormat('fr-FR').format(number);
 }
 
-// Confirmation dialogs
-function confirmDelete(message = 'Are you sure you want to delete this item?') {
-    return confirm(message);
+/**
+ * Global form submit confirmation handler for inline onsubmit="return confirmSubmit(event, '...')"
+ */
+function confirmSubmit(e, message, title, confirmText, confirmBtnClass) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    const target = e ? (e.target || e.srcElement) : null;
+    const form = target ? (target.tagName === 'FORM' ? target : target.closest('form')) : null;
+
+    showConfirm({
+        title: title || 'Confirmation',
+        message: message || 'Êtes-vous sûr de vouloir effectuer cette action ?',
+        confirmText: confirmText || 'Supprimer',
+        confirmBtnClass: confirmBtnClass || 'btn-danger'
+    }, function() {
+        if (form) {
+            HTMLFormElement.prototype.submit.call(form);
+        }
+    });
+
+    return false;
 }
 
-// Toast notifications (placeholder)
+/**
+ * Show a styled in-app confirmation modal instead of browser native confirm()
+ */
+function showConfirm(options, onConfirm) {
+    let opts = typeof options === 'string' ? { message: options } : (options || {});
+    const modal = document.getElementById('customConfirmModal');
+    if (!modal) {
+        if (confirm(opts.message || 'Êtes-vous sûr ?')) {
+            if (onConfirm) onConfirm();
+        }
+        return;
+    }
+
+    document.getElementById('confirmModalTitle').textContent = opts.title || 'Confirmation';
+    document.getElementById('confirmModalMessage').textContent = opts.message || 'Êtes-vous sûr de vouloir effectuer cette action ?';
+
+    const okBtn = document.getElementById('confirmModalOkBtn');
+    const cancelBtn = document.getElementById('confirmModalCancelBtn');
+
+    okBtn.textContent = opts.confirmText || 'Confirmer';
+    okBtn.className = 'btn ' + (opts.confirmBtnClass || 'btn-danger');
+    cancelBtn.textContent = opts.cancelText || 'Annuler';
+
+    const cleanup = () => {
+        closeModal(modal);
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+    };
+
+    okBtn.onclick = function() {
+        cleanup();
+        if (onConfirm) onConfirm();
+    };
+
+    cancelBtn.onclick = function() {
+        cleanup();
+    };
+
+    openModal('customConfirmModal');
+}
+
+/**
+ * Show a styled in-app alert modal instead of browser native alert()
+ */
+function showAlert(options) {
+    let opts = typeof options === 'string' ? { message: options } : (options || {});
+    const modal = document.getElementById('customAlertModal');
+    if (!modal) {
+        alert(opts.message || '');
+        return;
+    }
+
+    document.getElementById('alertModalTitle').textContent = opts.title || 'Information';
+    document.getElementById('alertModalMessage').textContent = opts.message || '';
+
+    const okBtn = document.getElementById('alertModalOkBtn');
+    okBtn.textContent = opts.btnText || 'D\'accord';
+
+    okBtn.onclick = function() {
+        closeModal(modal);
+    };
+
+    openModal('customAlertModal');
+}
+
+function confirmDelete(message = 'Êtes-vous sûr de vouloir supprimer cet élément ?') {
+    showConfirm({ message: message });
+}
+
 function showToast(message, type = 'info') {
-    // This would be implemented with a toast library
-    console.log(`${type.toUpperCase()}: ${message}`);
+    showAlert({ title: type.toUpperCase(), message: message });
 }
 
 // Export functions for global use
+window.confirmSubmit = confirmSubmit;
+window.showConfirm = showConfirm;
+window.showAlert = showAlert;
 window.Budgie = {
     openModal,
     closeModal,
     formatCurrency,
     formatDate,
     formatNumber,
+    confirmSubmit,
+    showConfirm,
+    showAlert,
     confirmDelete,
     showToast
 };

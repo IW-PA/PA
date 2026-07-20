@@ -1,7 +1,10 @@
 <?php
 require_once __DIR__ . '/../src/config/config.php';
 require_once SRC_PATH . '/services/ForecastService.php';
-requireLogin();
+if (!isLoggedIn()) {
+    require_once __DIR__ . '/landing.php';
+    exit;
+}
 
 // Calculate financial summary using ForecastService
 $forecastService = new ForecastService((int)$_SESSION['user_id']);
