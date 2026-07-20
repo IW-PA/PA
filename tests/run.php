@@ -3,12 +3,20 @@
 require_once __DIR__ . '/TestCase.php';
 require_once __DIR__ . '/ForecastServiceTest.php';
 require_once __DIR__ . '/PdfReportServiceTest.php';
-require_once __DIR__ . '/SubscriptionPaymentTest.php';
+require_once __DIR__ . '/ConfigHelpersTest.php';
+require_once __DIR__ . '/StripeWebhookSignatureTest.php';
+require_once __DIR__ . '/SubscriptionServiceTest.php';
+require_once __DIR__ . '/AdminServiceTest.php';
+require_once __DIR__ . '/ActivityLoggerTest.php';
 
 $tests = [
     new ForecastServiceTest(),
     new PdfReportServiceTest(),
-    new SubscriptionPaymentTest(),
+    new ConfigHelpersTest(),
+    new StripeWebhookSignatureTest(),
+    new SubscriptionServiceTest(),
+    new AdminServiceTest(),
+    new ActivityLoggerTest(),
 ];
 
 $hasFailures = false;
@@ -37,4 +45,3 @@ if ($hasFailures) {
 
 echo "All tests passed successfully.\n";
 exit(0);
-

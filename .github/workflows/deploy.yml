@@ -1,0 +1,87 @@
+name: CI/CD — test & deploy to production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Never let two production deploys run at once.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: budgie_db
+          MYSQL_USER: budgie_user
+          MYSQL_PASSWORD: budgie_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mbstring, gd, zip, xml
+          ini-values: variables_order=EGPCS
+          coverage: none
+
+      - name: Wait for MySQL and load schema
+        run: |
+          for i in $(seq 1 30); do
+            mysql -h 127.0.0.1 -P 3306 -uroot -proot -e "SELECT 1" >/dev/null 2>&1 && break
+            sleep 2
+          done
+          mysql -h 127.0.0.1 -P 3306 -uroot -proot budgie_db < database/schema.sql
+
+      - name: Run test suite
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_NAME: budgie_db
+          DB_USER: budgie_user
+          DB_PASS: budgie_password
+          APP_ENV: testing
+        run: php tests/run.php
+
+  deploy:
+    name: Deploy to production
+    needs: test
+    runs-on: ubuntu-latest
+    # Only deploy for pushes to main (skipped on pull_request runs).
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    steps:
+      - name: Deploy over SSH (git pull + rebuild + health check)
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 51.68.224.146 >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new orchiwi@51.68.224.146 '
+            set -e
+            cd /opt/budgie
+            git pull --ff-only origin main
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker image prune -f >/dev/null 2>&1 || true
+            for i in $(seq 1 12); do
+              code=$(curl -s -o /dev/null -w "%{http_code}" https://budgie.allan-morlet.fr/ || true)
+              if [ "$code" = "302" ] || [ "$code" = "200" ]; then echo "healthcheck OK ($code)"; exit 0; fi
+              sleep 3
+            done
+            echo "healthcheck FAILED"; exit 1
+          '
