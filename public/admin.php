@@ -21,7 +21,8 @@ try {
             subscription_type AS subscription,
             created_at,
             last_login,
-            status
+            status,
+            role
         FROM users
         ORDER BY created_at DESC
         LIMIT 50
@@ -161,15 +162,27 @@ include SRC_PATH . '/includes/header.php';
                         </td>
                         <td><?php echo $user['last_login'] ? date('d/m/Y H:i', strtotime($user['last_login'])) : '—'; ?></td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="openModal('editUserModal')">
-                                Modifier
-                            </button>
-                            <button class="btn btn-sm btn-warning" onclick="toggleUserStatus(<?php echo $user['id']; ?>)">
-                                <?php echo $user['status'] === 'active' ? 'Suspendre' : 'Activer'; ?>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteUser(<?php echo $user['id']; ?>)">
-                                Supprimer
-                            </button>
+                            <a href="admin_user.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-secondary">👁 Voir</a>
+                            <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                <?php if (($user['role'] ?? 'user') === 'admin'): ?>
+                                    <form method="POST" action="actions/admin_demote_user.php" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+                                        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                        <button type="submit" class="btn btn-sm btn-warning">Rétrograder en utilisateur</button>
+                                    </form>
+                                <?php else: ?>
+                                    <form method="POST" action="actions/admin_promote_user.php" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+                                        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                        <button type="submit" class="btn btn-sm btn-primary">Promouvoir admin</button>
+                                    </form>
+                                <?php endif; ?>
+                                <button class="btn btn-sm btn-danger" onclick="deleteUser(<?php echo $user['id']; ?>)">
+                                    Supprimer
+                                </button>
+                            <?php else: ?>
+                                <span class="text-muted" style="font-size: 0.85em;">(vous)</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

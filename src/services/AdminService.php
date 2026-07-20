@@ -235,6 +235,48 @@ class AdminService {
     }
     
     /**
+     * Read-only: a user's non-deleted accounts (admin drill-down view).
+     * @param int $userId
+     * @return array
+     */
+    public static function getUserAccounts($userId) {
+        return fetchAll(
+            "SELECT * FROM accounts WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC",
+            [$userId]
+        );
+    }
+
+    /**
+     * Read-only: a user's non-deleted expenses, with account names.
+     * @param int $userId
+     * @return array
+     */
+    public static function getUserExpenses($userId) {
+        return fetchAll(
+            "SELECT e.*, a.name AS account_name
+             FROM expenses e JOIN accounts a ON e.account_id = a.id
+             WHERE e.user_id = ? AND e.deleted_at IS NULL
+             ORDER BY e.start_date DESC",
+            [$userId]
+        );
+    }
+
+    /**
+     * Read-only: a user's non-deleted incomes, with account names.
+     * @param int $userId
+     * @return array
+     */
+    public static function getUserIncomes($userId) {
+        return fetchAll(
+            "SELECT i.*, a.name AS account_name
+             FROM incomes i JOIN accounts a ON i.account_id = a.id
+             WHERE i.user_id = ? AND i.deleted_at IS NULL
+             ORDER BY i.start_date DESC",
+            [$userId]
+        );
+    }
+
+    /**
      * Get user details by ID
      * @param int $userId
      * @return array|null

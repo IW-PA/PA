@@ -88,4 +88,35 @@ class AdminServiceTest extends TestCase
         $this->assertSame(false, AdminService::deleteUser($adminId));
         $this->assertEquals('active', fetchOne("SELECT status FROM users WHERE id = ?", [$adminId])['status']);
     }
+
+    public function testAdminCanReadAnotherUsersFinancialData()
+    {
+        $this->asAdmin();
+        $uid = $this->makeUser();
+
+        $accId = (int) insertRecord('accounts', ['user_id' => $uid, 'name' => 'Livret Test', 'balance' => 100]);
+        insertRecord('expenses', [
+            'user_id' => $uid, 'account_id' => $accId, 'name' => 'Loyer',
+            'amount' => 500, 'frequency' => 'mensuel', 'start_date' => '2026-01-01',
+        ]);
+        insertRecord('incomes', [
+            'user_id' => $uid, 'account_id' => $accId, 'name' => 'Salaire',
+            'amount' => 2000, 'frequency' => 'mensuel', 'start_date' => '2026-01-01',
+        ]);
+        // A soft-deleted account must NOT appear in the admin view.
+        insertRecord('accounts', ['user_id' => $uid, 'name' => 'Supprime', 'deleted_at' => date('Y-m-d H:i:s')]);
+
+        $accounts = AdminService::getUserAccounts($uid);
+        $expenses = AdminService::getUserExpenses($uid);
+        $incomes  = AdminService::getUserIncomes($uid);
+        $this->cleanup($uid); // FK cascade removes accounts/expenses/incomes
+
+        $this->assertEquals(1, count($accounts), 'only the non-deleted account is returned');
+        $this->assertEquals('Livret Test', $accounts[0]['name']);
+        $this->assertEquals(1, count($expenses));
+        $this->assertEquals('Loyer', $expenses[0]['name']);
+        $this->assertEquals('Livret Test', $expenses[0]['account_name']);
+        $this->assertEquals(1, count($incomes));
+        $this->assertEquals('Salaire', $incomes[0]['name']);
+    }
 }
