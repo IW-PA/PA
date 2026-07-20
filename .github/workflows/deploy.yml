@@ -75,7 +75,8 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new orchiwi@51.68.224.146 '
             set -e
             cd /opt/budgie
-            git pull --ff-only origin main
+            git fetch --prune origin main
+            git reset --hard origin/main
             docker compose -f docker-compose.prod.yml up -d --build
             docker image prune -f >/dev/null 2>&1 || true
             for i in $(seq 1 12); do
