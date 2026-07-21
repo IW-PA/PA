@@ -101,12 +101,25 @@ try {
         'tax_rate' => 0.00
     ]);
 
-    // Email verification: the account stays unverified and the user is NOT logged in
-    // until they confirm via the emailed link.
+    ActivityLogger::log($userId, 'auth.signup', 'user', $userId, ['email' => $email]);
+
+    if (APP_ENV === 'development') {
+        // Dev shortcut: skip email verification — mark the account verified and log in directly.
+        updateRecord('users', ['email_verified_at' => date('Y-m-d H:i:s')], 'id = :id', ['id' => $userId]);
+        $_SESSION['user_id']           = $userId;
+        $_SESSION['user_name']         = $first_name . ' ' . $last_name;
+        $_SESSION['user_email']        = $email;
+        $_SESSION['user_subscription'] = 'free';
+        $_SESSION['user_role']         = 'user';
+        $_SESSION['user_status']       = 'active';
+        setFlashMessage('success', '[DEV] Compte créé et vérifié automatiquement.');
+        redirect('index.php');
+    }
+
+    // Production: the account stays unverified and the user is NOT logged in until
+    // they confirm via the emailed link.
     require_once SRC_PATH . '/services/EmailVerificationService.php';
     EmailVerificationService::createAndSend($userId, $email, $first_name);
-
-    ActivityLogger::log($userId, 'auth.signup', 'user', $userId, ['email' => $email]);
 
     setFlashMessage('success', 'Inscription réussie ! Un email de confirmation a été envoyé à ' . $email . '. Cliquez sur le lien pour activer votre compte.');
     redirect('verify_notice.php?email=' . urlencode($email));

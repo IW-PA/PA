@@ -57,6 +57,36 @@ class EmailVerificationService
         return (int) $row['user_id'];
     }
 
+    /**
+     * Inspect a token WITHOUT consuming it (so email link pre-fetchers/scanners
+     * that GET the link don't burn the single-use token). Returns:
+     *   'valid'            unused + not expired -> show a confirm button
+     *   'already_verified' the token's user is already verified -> show success
+     *   'invalid'          unknown / expired / used-and-not-verified
+     */
+    public static function peek(string $token): string
+    {
+        if ($token === '') {
+            return 'invalid';
+        }
+        $row = fetchOne(
+            "SELECT t.used_at, (t.expires_at > NOW()) AS fresh, u.email_verified_at
+             FROM email_verification_tokens t JOIN users u ON u.id = t.user_id
+             WHERE t.token = ?",
+            [$token]
+        );
+        if (!$row) {
+            return 'invalid';
+        }
+        if ($row['email_verified_at'] !== null) {
+            return 'already_verified';
+        }
+        if ($row['used_at'] === null && (int) $row['fresh'] === 1) {
+            return 'valid';
+        }
+        return 'invalid';
+    }
+
     public static function isVerified(int $userId): bool
     {
         $u = fetchOne("SELECT email_verified_at FROM users WHERE id = ?", [$userId]);

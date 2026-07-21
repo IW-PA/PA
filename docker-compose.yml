@@ -36,7 +36,7 @@ services:
       DB_USER: budgie_user
       DB_PASS: budgie_password
       APP_URL: http://localhost:8082
-      APP_ENV: production
+      APP_ENV: development
       SECRET_KEY: your-secret-key-change-this-in-production
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}

@@ -11,6 +11,12 @@ include SRC_PATH . '/includes/header.php';
             <p class="text-muted">Connectez-vous à votre espace personnel</p>
         </div>
 
+        <?php if (APP_ENV === 'development'): ?>
+        <div style="background:#fef3c7; border:1px solid #f59e0b; color:#92400e; padding:.75rem 1rem; border-radius:var(--border-radius); margin-bottom:1.25rem; text-align:center; font-weight:600;">
+            ⚙️ Environnement de développement — vérification email désactivée
+        </div>
+        <?php endif; ?>
+
 <form method="POST" action="auth/login_process.php">
             <div class="form-group">
                 <label for="email" class="form-label">Email</label>

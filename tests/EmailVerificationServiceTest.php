@@ -65,6 +65,31 @@ class EmailVerificationServiceTest extends TestCase
         $this->assertSame(null, $replay, 'a used token cannot be reused');
     }
 
+    public function testPeekReportsStateWithoutConsumingTheToken()
+    {
+        $uid   = $this->makeUnverifiedUser();
+        $valid = 'evt_peek_' . uniqid('', true);
+        $this->insertToken($uid, $valid, 'DATE_ADD(NOW(), INTERVAL 1 HOUR)');
+
+        // A GET/peek must NOT burn the single-use token (the whole point of the fix).
+        $this->assertEquals('valid', EmailVerificationService::peek($valid));
+        $this->assertEquals('valid', EmailVerificationService::peek($valid), 'peek is non-consuming');
+        $this->assertEquals($uid, EmailVerificationService::verify($valid), 'token still usable after peeking');
+
+        // Once the user is verified, a re-peek reports success (idempotent, scanner-safe).
+        $this->assertEquals('already_verified', EmailVerificationService::peek($valid));
+
+        $this->assertEquals('invalid', EmailVerificationService::peek('does-not-exist-' . uniqid()));
+
+        $uid2 = $this->makeUnverifiedUser();
+        $exp  = 'evt_peekexp_' . uniqid('', true);
+        $this->insertToken($uid2, $exp, 'DATE_SUB(NOW(), INTERVAL 1 HOUR)');
+        $this->assertEquals('invalid', EmailVerificationService::peek($exp));
+
+        $this->dropUser($uid);
+        $this->dropUser($uid2);
+    }
+
     public function testExpiredAndInvalidTokensRejected()
     {
         $uid     = $this->makeUnverifiedUser();

@@ -52,8 +52,8 @@ if (!verifyPassword($password, $user['password_hash'])) {
     redirect('login.php');
 }
 
-    // Block login until the email address is verified.
-    if (empty($user['email_verified_at'])) {
+    // Block login until the email address is verified (skipped in development).
+    if (APP_ENV !== 'development' && empty($user['email_verified_at'])) {
         ActivityLogger::log((int) $user['id'], 'auth.login_unverified', 'user', (int) $user['id'], ['email' => $email]);
         setFlashMessage('error', "Votre email n'est pas encore vérifié. Consultez votre boîte mail pour activer votre compte.");
         redirect('verify_notice.php?email=' . urlencode($email));
