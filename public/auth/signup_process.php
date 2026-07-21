@@ -69,9 +69,11 @@ try {
     $existingUser = fetchOne("SELECT id FROM users WHERE email = ?", [$email]);
     
     if ($existingUser) {
+        // Do not reveal that the address is already registered (account enumeration):
+        // respond exactly like a fresh signup, without creating a duplicate account.
         ActivityLogger::log(null, 'auth.signup_duplicate', 'user', (int) $existingUser['id'], ['email' => $email]);
-        setFlashMessage('error', 'Cette adresse email est déjà utilisée.');
-        redirect('signup.php');
+        setFlashMessage('success', 'Inscription réussie ! Un email de confirmation a été envoyé à ' . $email . '. Cliquez sur le lien pour activer votre compte.');
+        redirect('verify_notice.php?email=' . urlencode($email));
     }
 
     // Hash password
