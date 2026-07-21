@@ -17,7 +17,7 @@ CREATE INDEX idx_users_status ON users(status);
 
 -- Create first admin user (update email/password as needed)
 -- Password: admin123 (hashed with password_hash)
-INSERT INTO users (first_name, last_name, email, password, role, subscription_type, status, created_at) 
+INSERT INTO users (first_name, last_name, email, password_hash, role, subscription_type, status, created_at)
 VALUES (
     'Admin', 
     'User', 
