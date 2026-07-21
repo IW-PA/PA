@@ -38,22 +38,19 @@ echo "<!DOCTYPE html>
     <h1>🐦 Budgie Migration Runner</h1>
 ";
 
-$migrationFile = __DIR__ . '/migrations/add_admin_role.sql';
+$migrationFiles = glob(__DIR__ . '/migrations/*.sql');
+sort($migrationFiles);
 
-if (!file_exists($migrationFile)) {
-    echo "<p class='error'>Migration file not found: {$migrationFile}</p>";
-    echo "</body></html>";
+if (!$migrationFiles) {
+    echo "<p class='error'>No migration files found in migrations/.</p></body></html>";
     exit;
 }
 
-echo "<p class='info'>Reading migration file...</p>";
+echo "<p class='info'>Applying " . count($migrationFiles) . " migration file(s)...</p>";
 
-$sql = file_get_contents($migrationFile);
-
-if (!$sql) {
-    echo "<p class='error'>Failed to read migration file</p>";
-    echo "</body></html>";
-    exit;
+$sql = '';
+foreach ($migrationFiles as $f) {
+    $sql .= "-- " . basename($f) . "\n" . file_get_contents($f) . "\n";
 }
 
 echo "<p class='info'>Running migration...</p>";
