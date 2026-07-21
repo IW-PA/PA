@@ -41,7 +41,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <?php if (!in_array($current_page, ['login', 'signup', 'forgot_password', 'reset_password', 'landing'])): ?>
+    <?php if (!in_array($current_page, ['login', 'signup', 'forgot_password', 'reset_password', 'landing', 'verify_email', 'verify_notice'])): ?>
     <div class="main-layout">
         <!-- Sidebar -->
         <nav class="sidebar" id="appSidebar">
@@ -144,4 +144,14 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             if ($gFlashSuccess): ?>
             <div class="alert alert-success" style="margin: 0 0 1rem 0;"><?php echo htmlspecialchars($gFlashSuccess); ?></div>
             <?php endif; ?>
+    <?php else: // auth pages (login/signup/verify/...) — still show flash feedback ?>
+        <?php
+        $gFlashError   = getFlashMessage('error');
+        $gFlashSuccess = getFlashMessage('success');
+        if ($gFlashError || $gFlashSuccess): ?>
+        <div style="max-width:400px; margin:1.5rem auto 0; padding:0 1rem;">
+            <?php if ($gFlashError): ?><div class="alert alert-danger"><?php echo $gFlashError; ?></div><?php endif; ?>
+            <?php if ($gFlashSuccess): ?><div class="alert alert-success"><?php echo htmlspecialchars($gFlashSuccess); ?></div><?php endif; ?>
+        </div>
+        <?php endif; ?>
     <?php endif; ?>

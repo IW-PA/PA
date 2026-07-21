@@ -30,7 +30,7 @@ include SRC_PATH . '/includes/header.php';
             <div class="form-group">
                 <label for="password" class="form-label">Mot de passe</label>
                 <input type="password" id="password" name="password" class="form-input" required minlength="8">
-                <small class="form-hint">Minimum 8 caractères (lettres, chiffres et symboles recommandés)</small>
+                <small class="form-hint">Au moins 8 caractères, avec une lettre minuscule et un chiffre.</small>
                 <div id="password-strength" style="margin-top: 0.5rem; display: none;">
                     <div style="height: 4px; background: var(--gray-200); border-radius: 2px; overflow: hidden;">
                         <div id="password-strength-bar" style="height: 100%; width: 0%; transition: all 0.3s;"></div>
