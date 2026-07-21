@@ -8,6 +8,7 @@ require_once __DIR__ . '/StripeWebhookSignatureTest.php';
 require_once __DIR__ . '/SubscriptionServiceTest.php';
 require_once __DIR__ . '/AdminServiceTest.php';
 require_once __DIR__ . '/ActivityLoggerTest.php';
+require_once __DIR__ . '/EmailVerificationServiceTest.php';
 
 $tests = [
     new ForecastServiceTest(),
@@ -17,6 +18,7 @@ $tests = [
     new SubscriptionServiceTest(),
     new AdminServiceTest(),
     new ActivityLoggerTest(),
+    new EmailVerificationServiceTest(),
 ];
 
 $hasFailures = false;

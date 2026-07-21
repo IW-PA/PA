@@ -29,7 +29,7 @@ if (!checkRateLimit("login_{$email}")) {
 try {
     // Get user from database
     $user = fetchOne(
-        "SELECT id, first_name, last_name, email, password_hash, subscription_type, status, role FROM users WHERE email = ?",
+        "SELECT id, first_name, last_name, email, password_hash, subscription_type, status, role, email_verified_at FROM users WHERE email = ?",
         [$email]
     );
 
@@ -51,6 +51,13 @@ if (!verifyPassword($password, $user['password_hash'])) {
     setFlashMessage('error', 'Email ou mot de passe incorrect.');
     redirect('login.php');
 }
+
+    // Block login until the email address is verified.
+    if (empty($user['email_verified_at'])) {
+        ActivityLogger::log((int) $user['id'], 'auth.login_unverified', 'user', (int) $user['id'], ['email' => $email]);
+        setFlashMessage('error', "Votre email n'est pas encore vérifié. Consultez votre boîte mail pour activer votre compte.");
+        redirect('verify_notice.php?email=' . urlencode($email));
+    }
 
     // Update last login
     executeQuery(

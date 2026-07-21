@@ -20,7 +20,8 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
-    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active'
+    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
+    email_verified_at TIMESTAMP NULL DEFAULT NULL
 );
 
 -- Accounts table
@@ -178,6 +179,17 @@ CREATE TABLE password_reset_tokens (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Email verification tokens (single-use, expiring). Mirrors password_reset_tokens.
+CREATE TABLE email_verification_tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token VARCHAR(190) UNIQUE NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Create indexes for better performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_subscription ON users(subscription_type);
@@ -222,6 +234,9 @@ INSERT INTO users (first_name, last_name, email, password_hash, subscription_typ
 
 -- Promote the admin account: grant the admin role used by the admin panel/auth
 UPDATE users SET first_name = 'Admin', last_name = 'Administrator', role = 'admin' WHERE email = 'admin@budgie.com';
+
+-- Seeded accounts are considered already verified (a fresh install must not lock anyone out).
+UPDATE users SET email_verified_at = NOW();
 
 -- Sample accounts
 INSERT INTO accounts (user_id, name, description, balance, interest_rate, tax_rate) VALUES

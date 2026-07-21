@@ -56,6 +56,13 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-price_1TvE11Buv3T8qwkSvtJJ1a3g}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_SECURE: ${SMTP_SECURE:-tls}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@budgie.allan-morlet.fr}
+      FROM_NAME: ${FROM_NAME:-Budgie}
     volumes:
       - ./logs:/var/www/html/logs
       - ./public/uploads:/var/www/html/public/uploads

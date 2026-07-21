@@ -101,32 +101,15 @@ try {
         'tax_rate' => 0.00
     ]);
 
-    // Create session
-    $_SESSION['user_id'] = $userId;
-    $_SESSION['user_name'] = $first_name . ' ' . $last_name;
-    $_SESSION['user_email'] = $email;
-    $_SESSION['user_subscription'] = 'free';
-    $_SESSION['user_role'] = 'user';
+    // Email verification: the account stays unverified and the user is NOT logged in
+    // until they confirm via the emailed link.
+    require_once SRC_PATH . '/services/EmailVerificationService.php';
+    EmailVerificationService::createAndSend($userId, $email, $first_name);
 
-    // Generate session token
-    $sessionToken = generateToken();
-    executeQuery(
-        "INSERT INTO user_sessions (user_id, session_token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))",
-        [$userId, $sessionToken]
-    );
-    $_SESSION['session_token'] = $sessionToken;
+    ActivityLogger::log($userId, 'auth.signup', 'user', $userId, ['email' => $email]);
 
-    setFlashMessage('success', 'Inscription réussie ! Bienvenue dans Budgie, ' . $first_name . ' !');
-
-    ActivityLogger::log(
-        $userId,
-        'auth.signup',
-        'user',
-        $userId,
-        ['email' => $email]
-    );
-
-    redirect('index.php');
+    setFlashMessage('success', 'Inscription réussie ! Un email de confirmation a été envoyé à ' . $email . '. Cliquez sur le lien pour activer votre compte.');
+    redirect('verify_notice.php?email=' . urlencode($email));
 
 } catch (Exception $e) {
     error_log("Signup error: " . $e->getMessage());

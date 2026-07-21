@@ -56,6 +56,7 @@ define('SMTP_HOST', $_ENV['SMTP_HOST'] ?? 'smtp.gmail.com');
 define('SMTP_PORT', $_ENV['SMTP_PORT'] ?? 587);
 define('SMTP_USERNAME', $_ENV['SMTP_USERNAME'] ?? '');
 define('SMTP_PASSWORD', $_ENV['SMTP_PASSWORD'] ?? '');
+define('SMTP_SECURE', $_ENV['SMTP_SECURE'] ?? 'tls'); // 'tls' (STARTTLS/587) or 'ssl' (implicit/465)
 define('FROM_EMAIL', $_ENV['FROM_EMAIL'] ?? 'noreply@budgie.com');
 define('FROM_NAME', $_ENV['FROM_NAME'] ?? 'Budgie');
 
