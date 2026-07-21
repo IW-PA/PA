@@ -22,3 +22,7 @@ public/uploads/*
 # OS cruft
 .DS_Store
 Thumbs.db
+
+# ruflo agentdb runtime artifacts
+agentdb.rvf
+agentdb.rvf.lock
