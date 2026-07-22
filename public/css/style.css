@@ -222,7 +222,14 @@ body {
     background: var(--white);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    overflow: hidden;
+    overflow-x: auto;                    /* wide tables scroll sideways instead of clipping */
+    -webkit-overflow-scrolling: touch;   /* momentum scrolling on iOS */
+}
+
+/* Keep embedded charts/images from ever forcing horizontal page overflow */
+canvas,
+img {
+    max-width: 100%;
 }
 
 .table {
@@ -548,6 +555,92 @@ body {
     
     .plan-card.featured {
         transform: none;
+    }
+
+    /* Wide tables: don't wrap cells — let the container scroll sideways
+       instead of squeezing columns until they clip. */
+    .table th,
+    .table td {
+        white-space: nowrap;
+        padding: 0.75rem;
+    }
+
+    .header h2 {
+        font-size: 1.15rem;
+    }
+
+    /* Safety net: never allow accidental page-level horizontal scroll */
+    body {
+        overflow-x: hidden;
+    }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 0.75rem;
+    }
+
+    .header {
+        margin: -0.75rem -0.75rem 1rem -0.75rem;
+        padding: 0.75rem;
+    }
+
+    .header h2 {
+        font-size: 1.05rem;
+        max-width: 45vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-menu {
+        gap: 0.5rem;
+    }
+
+    /* Collapse the dark-mode toggle to just its icon */
+    #dmText {
+        display: none;
+    }
+
+    /* Truncate long usernames so the top bar never overflows */
+    .user-info {
+        max-width: 34vw;
+    }
+
+    .user-info span {
+        display: inline-block;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+    }
+
+    /* Comfortable touch targets */
+    .btn {
+        min-height: 44px;
+    }
+
+    /* Denser but still legible tables */
+    .table th,
+    .table td {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+    }
+
+    .card,
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
 }
 
