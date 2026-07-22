@@ -1,4 +1,8 @@
 <?php
+// Start output buffering immediately so any PHP warnings/notices
+// cannot corrupt the PDF binary that will be sent later.
+ob_start();
+
 require_once __DIR__ . '/../../src/config/config.php';
 require_once SRC_PATH . '/services/PdfReportService.php';
 require_once SRC_PATH . '/services/ActivityLogger.php';
@@ -18,8 +22,8 @@ try {
     // Log activity
     ActivityLogger::log($userId, 'export.pdf_downloaded', 'report', null, ['range' => $range]);
 
-    // Clean output buffer if any text was emitted
-    if (ob_get_level()) {
+    // Discard every output buffer level that may have captured warnings/notices
+    while (ob_get_level() > 0) {
         ob_end_clean();
     }
 
@@ -35,7 +39,12 @@ try {
     exit;
 
 } catch (Exception $e) {
+    // Clean buffers before redirecting too
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
     error_log("PDF Generation error: " . $e->getMessage());
     setFlashMessage('error', 'Une erreur est survenue lors de la génération du rapport PDF.');
     redirect('index.php');
 }
+

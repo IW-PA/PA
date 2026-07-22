@@ -58,10 +58,10 @@ class BudgiePdf extends FPDF
     public function conv($str)
     {
         if (function_exists('iconv')) {
-            $converted = @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $str);
+            $converted = @iconv('UTF-8', 'Windows-1252//TRANSLIT', $str);
             if ($converted !== false) return $converted;
         }
-        return utf8_decode($str);
+        return mb_convert_encoding($str, 'Windows-1252', 'UTF-8');
     }
 }
 
@@ -172,8 +172,9 @@ class PdfReportService
         $pdf->Cell($cardW - 4, 4, $pdf->conv('SOLDE NET'), 0, 1, 'L');
         $pdf->SetX(142);
         $pdf->SetFont('Helvetica', 'B', 12);
-        $sign = $netBalance >= 0 ? '+ ' : '';
-        $pdf->Cell($cardW - 4, 7, $pdf->conv($sign . number_format($netBalance, 2, ',', ' ') . ' €'), 0, 1, 'L');
+        $sign = $netBalance >= 0 ? '+ ' : '- ';
+        $formattedBalance = $sign . number_format(abs($netBalance), 2, ',', ' ') . ' €';
+        $pdf->Cell($cardW - 4, 7, $pdf->conv($formattedBalance), 0, 1, 'L');
 
         $pdf->SetY($startY + $cardH + 8);
 
@@ -207,7 +208,7 @@ class PdfReportService
                 $pdf->Cell(42, 6.5, $pdf->conv(substr($inc['account_name'] ?? 'Non assigné', 0, 24)), 'LRB', 0, 'L', true);
                 $pdf->Cell(60, 6.5, $pdf->conv(substr($inc['name'], 0, 36)), 'LRB', 0, 'L', true);
                 $pdf->Cell(26, 6.5, $pdf->conv(ucfirst($inc['frequency'])), 'LRB', 0, 'C', true);
-                $pdf->Cell(30, 6.5, number_format($inc['amount'], 2, ',', ' ') . ' €', 'LRB', 1, 'R', true);
+                $pdf->Cell(30, 6.5, $pdf->conv(number_format($inc['amount'], 2, ',', ' ') . ' €'), 'LRB', 1, 'R', true);
                 $fill = !$fill;
             }
         }
@@ -243,7 +244,7 @@ class PdfReportService
                 $pdf->Cell(42, 6.5, $pdf->conv(substr($exp['account_name'] ?? 'Non assigné', 0, 24)), 'LRB', 0, 'L', true);
                 $pdf->Cell(60, 6.5, $pdf->conv(substr($exp['name'], 0, 36)), 'LRB', 0, 'L', true);
                 $pdf->Cell(26, 6.5, $pdf->conv(ucfirst($exp['frequency'])), 'LRB', 0, 'C', true);
-                $pdf->Cell(30, 6.5, number_format($exp['amount'], 2, ',', ' ') . ' €', 'LRB', 1, 'R', true);
+                $pdf->Cell(30, 6.5, $pdf->conv(number_format($exp['amount'], 2, ',', ' ') . ' €'), 'LRB', 1, 'R', true);
                 $fill = !$fill;
             }
         }
