@@ -153,6 +153,27 @@ function formatCurrency($amount) {
     return '€' . number_format($amount, 2, ',', ' ');
 }
 
+/**
+ * Human label for a recurrence. interval_months wins when set; the legacy
+ * frequency ENUM is the fallback for rows written before that column existed.
+ */
+function formatFrequency($frequency, $intervalMonths = null) {
+    if ($intervalMonths !== null && (int) $intervalMonths > 0) {
+        $n = (int) $intervalMonths;
+        return $n === 1 ? 'Tous les mois' : 'Tous les ' . $n . ' mois';
+    }
+
+    switch (strtolower(trim((string) $frequency))) {
+        case 'mensuel':
+        case 'recurrent':   return 'Tous les mois';
+        case 'bimensuel':   return 'Tous les 2 mois';
+        case 'trimestriel': return 'Tous les 3 mois';
+        case 'semestriel':  return 'Tous les 6 mois';
+        case 'annuel':      return 'Tous les 12 mois';
+        default:            return 'Ponctuel';
+    }
+}
+
 function formatDate($date, $format = 'd/m/Y') {
     return date($format, strtotime($date));
 }

@@ -25,15 +25,6 @@ $user_incomes = fetchAll(
     [$_SESSION['user_id']]
 );
 
-$frequency_labels = [
-    'ponctuel'    => 'Ponctuel',
-    'mensuel'     => 'Tous les mois',
-    'bimensuel'   => 'Tous les 2 mois',
-    'trimestriel' => 'Tous les 3 mois',
-    'semestriel'  => 'Tous les 6 mois',
-    'annuel'      => 'Tous les 12 mois',
-];
-
 $has_targets = !empty($user_expenses) || !empty($user_incomes);
 ?>
 
@@ -92,6 +83,7 @@ $has_targets = !empty($user_expenses) || !empty($user_incomes);
                             'description' => $exception['description'] ?? '',
                             'amount'      => $exception['amount'],
                             'frequency'   => $exception['frequency'],
+                            'interval'    => $exception['interval_months'] ?? null,
                             'start_date'  => $exception['start_date'],
                             'end_date'    => $exception['end_date'] ?? '',
                         ];
@@ -106,7 +98,7 @@ $has_targets = !empty($user_expenses) || !empty($user_incomes);
                             — <?php echo htmlspecialchars($target_name ?? ''); ?>
                         </td>
                         <td><?php echo formatCurrency($exception['amount']); ?></td>
-                        <td><?php echo $frequency_labels[$exception['frequency']] ?? htmlspecialchars($exception['frequency']); ?></td>
+                        <td><?php echo formatFrequency($exception['frequency'], $exception['interval_months'] ?? null); ?></td>
                         <td><?php echo formatDate($exception['start_date']); ?></td>
                         <td><?php echo $exception['end_date'] ? formatDate($exception['end_date']) : '—'; ?></td>
                         <td>
@@ -178,16 +170,15 @@ $has_targets = !empty($user_expenses) || !empty($user_incomes);
                 <input type="number" id="exception_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
-                <label for="exception_frequency" class="form-label">Fréquence</label>
-                <select id="exception_frequency" name="frequency" class="form-select" required>
-                    <option value="">Sélectionner une fréquence</option>
-                    <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Tous les mois</option>
-                    <option value="bimensuel">Tous les 2 mois</option>
-                    <option value="trimestriel">Tous les 3 mois</option>
-                    <option value="semestriel">Tous les 6 mois</option>
-                    <option value="annuel">Tous les 12 mois</option>
+                <label for="exception_recurrence" class="form-label">Durée</label>
+                <select id="exception_recurrence" name="recurrence" class="form-select" onchange="toggleInterval(this, 'exception_interval_group')" required>
+                    <option value="recurrent">Tous les N mois</option>
+                    <option value="ponctuel">Ponctuelle</option>
                 </select>
+            </div>
+            <div class="form-group" id="exception_interval_group">
+                <label for="exception_interval" class="form-label">Tous les combien de mois&nbsp;?</label>
+                <input type="number" id="exception_interval" name="interval_months" class="form-input" min="1" max="120" value="1">
             </div>
             <div class="form-group">
                 <label for="exception_start_date" class="form-label">Date de début</label>
@@ -247,15 +238,15 @@ $has_targets = !empty($user_expenses) || !empty($user_incomes);
                 <input type="number" id="edit_exception_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
-                <label for="edit_exception_frequency" class="form-label">Fréquence</label>
-                <select id="edit_exception_frequency" name="frequency" class="form-select" required>
-                    <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Tous les mois</option>
-                    <option value="bimensuel">Tous les 2 mois</option>
-                    <option value="trimestriel">Tous les 3 mois</option>
-                    <option value="semestriel">Tous les 6 mois</option>
-                    <option value="annuel">Tous les 12 mois</option>
+                <label for="edit_exception_recurrence" class="form-label">Durée</label>
+                <select id="edit_exception_recurrence" name="recurrence" class="form-select" onchange="toggleInterval(this, 'edit_exception_interval_group')" required>
+                    <option value="recurrent">Tous les N mois</option>
+                    <option value="ponctuel">Ponctuelle</option>
                 </select>
+            </div>
+            <div class="form-group" id="edit_exception_interval_group">
+                <label for="edit_exception_interval" class="form-label">Tous les combien de mois&nbsp;?</label>
+                <input type="number" id="edit_exception_interval" name="interval_months" class="form-input" min="1" max="120" value="1">
             </div>
             <div class="form-group">
                 <label for="edit_exception_start_date" class="form-label">Date de début</label>
@@ -281,7 +272,12 @@ function openEditExceptionModal(exception) {
     document.getElementById('edit_exception_name').value        = exception.name;
     document.getElementById('edit_exception_description').value = exception.description || '';
     document.getElementById('edit_exception_amount').value      = exception.amount;
-    document.getElementById('edit_exception_frequency').value   = exception.frequency;
+    var legacy = { mensuel: 1, bimensuel: 2, trimestriel: 3, semestriel: 6, annuel: 12 };
+    var n = (exception.interval !== null && exception.interval !== undefined) ? parseInt(exception.interval, 10) : (legacy[exception.frequency] || 0);
+    var recSelect = document.getElementById('edit_exception_recurrence');
+    recSelect.value = (n > 0) ? 'recurrent' : 'ponctuel';
+    document.getElementById('edit_exception_interval').value = (n > 0) ? n : 1;
+    toggleInterval(recSelect, 'edit_exception_interval_group');
     document.getElementById('edit_exception_start_date').value  = exception.start_date || '';
     document.getElementById('edit_exception_end_date').value    = exception.end_date || '';
     openModal('editExceptionModal');

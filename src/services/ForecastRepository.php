@@ -19,7 +19,7 @@ class ForecastRepository implements ForecastRepositoryInterface
     public function getIncomes(int $userId): array
     {
         return fetchAll(
-            "SELECT id, account_id, name, amount, frequency, start_date, end_date
+            "SELECT id, account_id, name, amount, frequency, interval_months, start_date, end_date
              FROM incomes
              WHERE user_id = ? AND deleted_at IS NULL
              ORDER BY start_date ASC",
@@ -30,7 +30,7 @@ class ForecastRepository implements ForecastRepositoryInterface
     public function getExpenses(int $userId): array
     {
         return fetchAll(
-            "SELECT id, account_id, name, amount, frequency, start_date, end_date
+            "SELECT id, account_id, name, amount, frequency, interval_months, start_date, end_date
              FROM expenses
              WHERE user_id = ? AND deleted_at IS NULL
              ORDER BY start_date ASC",
@@ -41,7 +41,7 @@ class ForecastRepository implements ForecastRepositoryInterface
     public function getExceptions(int $userId): array
     {
         return fetchAll(
-            "SELECT id, income_id, expense_id, amount, frequency, start_date, end_date
+            "SELECT id, income_id, expense_id, amount, frequency, interval_months, start_date, end_date
              FROM exceptions
              WHERE user_id = ?",
             [$userId]

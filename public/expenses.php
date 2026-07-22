@@ -56,11 +56,11 @@ $user_accounts = fetchAll(
                 <select id="filter_frequency" class="filter-input">
                     <option value="">Toutes les fréquences</option>
                     <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Mensuel</option>
-                    <option value="bimensuel">Bi-mensuel</option>
-                    <option value="trimestriel">Trimestriel</option>
-                    <option value="semestriel">Semestriel</option>
-                    <option value="annuel">Annuel</option>
+                    <option value="mensuel">Tous les mois</option>
+                    <option value="bimensuel">Tous les 2 mois</option>
+                    <option value="trimestriel">Tous les 3 mois</option>
+                    <option value="semestriel">Tous les 6 mois</option>
+                    <option value="annuel">Tous les 12 mois</option>
                 </select>
             </div>
         </div>
@@ -95,7 +95,7 @@ $user_accounts = fetchAll(
                         <td><?php echo htmlspecialchars($expense['description']); ?></td>
                         <td><?php echo htmlspecialchars($expense['account_name']); ?></td>
                         <td class="text-danger"><strong>€<?php echo number_format($expense['amount'], 2); ?></strong></td>
-                        <td><?php echo htmlspecialchars($expense['frequency']); ?></td>
+                        <td><?php echo formatFrequency($expense['frequency'], $expense['interval_months'] ?? null); ?></td>
                         <td><?php echo date('d/m/Y', strtotime($expense['start_date'])); ?></td>
                         <td><?php echo $expense['end_date'] ? date('d/m/Y', strtotime($expense['end_date'])) : 'N/A'; ?></td>
                         <td>
@@ -107,6 +107,7 @@ $user_accounts = fetchAll(
                                     <?php echo $expense['account_id']; ?>,
                                     <?php echo $expense['amount']; ?>,
                                     <?php echo htmlspecialchars(json_encode($expense['frequency']), ENT_QUOTES); ?>,
+                                    <?php echo json_encode($expense['interval_months'] ?? null); ?>,
                                     <?php echo htmlspecialchars(json_encode($expense['start_date']), ENT_QUOTES); ?>,
                                     <?php echo htmlspecialchars(json_encode($expense['end_date'] ?? ''), ENT_QUOTES); ?>
                                 )">
@@ -160,16 +161,15 @@ $user_accounts = fetchAll(
                 <input type="number" id="expense_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
-                <label for="expense_frequency" class="form-label">Fréquence</label>
-                <select id="expense_frequency" name="frequency" class="form-select" required>
-                    <option value="">Sélectionner une fréquence</option>
-                    <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Tous les mois</option>
-                    <option value="bimensuel">Tous les 2 mois</option>
-                    <option value="trimestriel">Tous les 3 mois</option>
-                    <option value="semestriel">Tous les 6 mois</option>
-                    <option value="annuel">Tous les 12 mois</option>
+                <label for="expense_recurrence" class="form-label">Durée</label>
+                <select id="expense_recurrence" name="recurrence" class="form-select" onchange="toggleInterval(this, 'expense_interval_group')" required>
+                    <option value="recurrent">Tous les N mois</option>
+                    <option value="ponctuel">Ponctuelle</option>
                 </select>
+            </div>
+            <div class="form-group" id="expense_interval_group">
+                <label for="expense_interval" class="form-label">Tous les combien de mois&nbsp;?</label>
+                <input type="number" id="expense_interval" name="interval_months" class="form-input" min="1" max="120" value="1">
             </div>
             <div class="form-group">
                 <label for="expense_start_date" class="form-label">Date de début</label>
@@ -219,16 +219,15 @@ $user_accounts = fetchAll(
                 <input type="number" id="edit_expense_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
-                <label for="edit_expense_frequency" class="form-label">Fréquence</label>
-                <select id="edit_expense_frequency" name="frequency" class="form-select" required>
-                    <option value="">Sélectionner une fréquence</option>
-                    <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Tous les mois</option>
-                    <option value="bimensuel">Tous les 2 mois</option>
-                    <option value="trimestriel">Tous les 3 mois</option>
-                    <option value="semestriel">Tous les 6 mois</option>
-                    <option value="annuel">Tous les 12 mois</option>
+                <label for="edit_expense_recurrence" class="form-label">Durée</label>
+                <select id="edit_expense_recurrence" name="recurrence" class="form-select" onchange="toggleInterval(this, 'edit_expense_interval_group')" required>
+                    <option value="recurrent">Tous les N mois</option>
+                    <option value="ponctuel">Ponctuelle</option>
                 </select>
+            </div>
+            <div class="form-group" id="edit_expense_interval_group">
+                <label for="edit_expense_interval" class="form-label">Tous les combien de mois&nbsp;?</label>
+                <input type="number" id="edit_expense_interval" name="interval_months" class="form-input" min="1" max="120" value="1">
             </div>
             <div class="form-group">
                 <label for="edit_expense_start_date" class="form-label">Date de début</label>
@@ -247,7 +246,7 @@ $user_accounts = fetchAll(
 </div>
 
 <script>
-function openEditExpenseModal(id, name, description, accountId, amount, frequency, startDate, endDate) {
+function openEditExpenseModal(id, name, description, accountId, amount, frequency, intervalMonths, startDate, endDate) {
     document.getElementById('edit_expense_id').value = id;
     document.getElementById('edit_expense_name').value = name;
     document.getElementById('edit_expense_description').value = description;
@@ -264,14 +263,13 @@ function openEditExpenseModal(id, name, description, accountId, amount, frequenc
         }
     }
 
-    // Set frequency select
-    var freqSelect = document.getElementById('edit_expense_frequency');
-    for (var i = 0; i < freqSelect.options.length; i++) {
-        if (freqSelect.options[i].value === frequency) {
-            freqSelect.selectedIndex = i;
-            break;
-        }
-    }
+    // Durée: interval_months wins; fall back to the legacy ENUM for old rows.
+    var legacy = { mensuel: 1, bimensuel: 2, trimestriel: 3, semestriel: 6, annuel: 12 };
+    var n = (intervalMonths !== null && intervalMonths !== undefined) ? parseInt(intervalMonths, 10) : (legacy[frequency] || 0);
+    var recSelect = document.getElementById('edit_expense_recurrence');
+    recSelect.value = (n > 0) ? 'recurrent' : 'ponctuel';
+    document.getElementById('edit_expense_interval').value = (n > 0) ? n : 1;
+    toggleInterval(recSelect, 'edit_expense_interval_group');
 
     openModal('editExpenseModal');
 }

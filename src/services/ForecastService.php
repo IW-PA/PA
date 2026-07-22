@@ -194,7 +194,8 @@ class ForecastService
         $baseOccurrences = $this->buildOccurrenceSchedule(
             $record['start_date'] ?? null,
             $record['end_date'] ?? null,
-            $record['frequency'] ?? 'mensuel'
+            $record['frequency'] ?? 'mensuel',
+            isset($record['interval_months']) ? (int) $record['interval_months'] : null
         );
 
         $amount = (float) $record['amount'];
@@ -206,7 +207,10 @@ class ForecastService
             $exceptionOccurrences = $this->buildOccurrenceSchedule(
                 $exception['start_date'] ?? $record['start_date'],
                 $exception['end_date'] ?? $record['end_date'],
-                $exception['frequency'] ?? $record['frequency'] ?? 'mensuel'
+                $exception['frequency'] ?? $record['frequency'] ?? 'mensuel',
+                isset($exception['interval_months'])
+                    ? (int) $exception['interval_months']
+                    : (isset($record['interval_months']) ? (int) $record['interval_months'] : null)
             );
 
             foreach ($exceptionOccurrences as $month) {
@@ -223,7 +227,7 @@ class ForecastService
         return $schedule;
     }
 
-    private function buildOccurrenceSchedule(?string $startDate, ?string $endDate, ?string $frequency): array
+    private function buildOccurrenceSchedule(?string $startDate, ?string $endDate, ?string $frequency, ?int $intervalMonths = null): array
     {
         $occurrences = [];
 
@@ -242,18 +246,15 @@ class ForecastService
             return $occurrences;
         }
 
-        $frequency = $frequency ?: 'mensuel';
+        $interval = $this->frequencyToMonths($frequency, $intervalMonths);
 
-        if ($frequency === 'ponctuel') {
+        if ($interval <= 0) {
+            // Ponctuelle: a single échéance on its start month. Routing 0 here also
+            // stops the loop below from ever stepping '+0 month' forever.
             if ($start >= $this->startDate && $start <= $this->targetDate) {
                 $occurrences[] = $start->format('Y-m');
             }
             return $occurrences;
-        }
-
-        $interval = $this->frequencyToMonths($frequency);
-        if ($interval <= 0) {
-            $interval = 1;
         }
 
         $current = clone $start;
@@ -268,14 +269,22 @@ class ForecastService
         return $occurrences;
     }
 
-    private function frequencyToMonths(string $frequency): int
+    // Months between two échéances. interval_months is authoritative as soon as it
+    // is set; the legacy ENUM is only the fallback for rows written before the
+    // column existed. 0 means "ponctuelle".
+    private function frequencyToMonths(?string $frequency, ?int $intervalMonths = null): int
     {
-        $normalized = strtolower(trim($frequency));
+        if ($intervalMonths !== null) {
+            return max(0, $intervalMonths);
+        }
+
+        $normalized = strtolower(trim((string) $frequency));
 
         switch ($normalized) {
             case 'ponctuel':
                 return 0;
             case 'mensuel':
+            case 'recurrent': // 'recurrent' with no interval degrades to monthly
                 return 1;
             case 'bimensuel':
             case 'tous les 2 mois':

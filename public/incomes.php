@@ -57,11 +57,11 @@ $user_accounts = fetchAll(
                 <select id="filter_frequency_income" class="filter-input">
                     <option value="">Toutes les fréquences</option>
                     <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Mensuel</option>
-                    <option value="bimensuel">Bi-mensuel</option>
-                    <option value="trimestriel">Trimestriel</option>
-                    <option value="semestriel">Semestriel</option>
-                    <option value="annuel">Annuel</option>
+                    <option value="mensuel">Tous les mois</option>
+                    <option value="bimensuel">Tous les 2 mois</option>
+                    <option value="trimestriel">Tous les 3 mois</option>
+                    <option value="semestriel">Tous les 6 mois</option>
+                    <option value="annuel">Tous les 12 mois</option>
                 </select>
             </div>
         </div>
@@ -96,7 +96,7 @@ $user_accounts = fetchAll(
                         <td><?php echo htmlspecialchars($income['description']); ?></td>
                         <td><?php echo htmlspecialchars($income['account_name']); ?></td>
                         <td class="text-success"><strong>€<?php echo number_format($income['amount'], 2); ?></strong></td>
-                        <td><?php echo htmlspecialchars($income['frequency']); ?></td>
+                        <td><?php echo formatFrequency($income['frequency'], $income['interval_months'] ?? null); ?></td>
                         <td><?php echo date('d/m/Y', strtotime($income['start_date'])); ?></td>
                         <td><?php echo $income['end_date'] ? date('d/m/Y', strtotime($income['end_date'])) : 'N/A'; ?></td>
                         <td>
@@ -108,6 +108,7 @@ $user_accounts = fetchAll(
                                     <?php echo $income['account_id']; ?>,
                                     <?php echo $income['amount']; ?>,
                                     <?php echo htmlspecialchars(json_encode($income['frequency']), ENT_QUOTES); ?>,
+                                    <?php echo json_encode($income['interval_months'] ?? null); ?>,
                                     <?php echo htmlspecialchars(json_encode($income['start_date']), ENT_QUOTES); ?>,
                                     <?php echo htmlspecialchars(json_encode($income['end_date'] ?? ''), ENT_QUOTES); ?>
                                 )">
@@ -161,16 +162,15 @@ $user_accounts = fetchAll(
                 <input type="number" id="income_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
-                <label for="income_frequency" class="form-label">Fréquence</label>
-                <select id="income_frequency" name="frequency" class="form-select" required>
-                    <option value="">Sélectionner une fréquence</option>
-                    <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Tous les mois</option>
-                    <option value="bimensuel">Tous les 2 mois</option>
-                    <option value="trimestriel">Tous les 3 mois</option>
-                    <option value="semestriel">Tous les 6 mois</option>
-                    <option value="annuel">Tous les 12 mois</option>
+                <label for="income_recurrence" class="form-label">Durée</label>
+                <select id="income_recurrence" name="recurrence" class="form-select" onchange="toggleInterval(this, 'income_interval_group')" required>
+                    <option value="recurrent">Tous les N mois</option>
+                    <option value="ponctuel">Ponctuelle</option>
                 </select>
+            </div>
+            <div class="form-group" id="income_interval_group">
+                <label for="income_interval" class="form-label">Tous les combien de mois&nbsp;?</label>
+                <input type="number" id="income_interval" name="interval_months" class="form-input" min="1" max="120" value="1">
             </div>
             <div class="form-group">
                 <label for="income_start_date" class="form-label">Date de début</label>
@@ -220,16 +220,15 @@ $user_accounts = fetchAll(
                 <input type="number" id="edit_income_amount" name="amount" class="form-input" step="0.01" min="0.01" required>
             </div>
             <div class="form-group">
-                <label for="edit_income_frequency" class="form-label">Fréquence</label>
-                <select id="edit_income_frequency" name="frequency" class="form-select" required>
-                    <option value="">Sélectionner une fréquence</option>
-                    <option value="ponctuel">Ponctuel</option>
-                    <option value="mensuel">Tous les mois</option>
-                    <option value="bimensuel">Tous les 2 mois</option>
-                    <option value="trimestriel">Tous les 3 mois</option>
-                    <option value="semestriel">Tous les 6 mois</option>
-                    <option value="annuel">Tous les 12 mois</option>
+                <label for="edit_income_recurrence" class="form-label">Durée</label>
+                <select id="edit_income_recurrence" name="recurrence" class="form-select" onchange="toggleInterval(this, 'edit_income_interval_group')" required>
+                    <option value="recurrent">Tous les N mois</option>
+                    <option value="ponctuel">Ponctuelle</option>
                 </select>
+            </div>
+            <div class="form-group" id="edit_income_interval_group">
+                <label for="edit_income_interval" class="form-label">Tous les combien de mois&nbsp;?</label>
+                <input type="number" id="edit_income_interval" name="interval_months" class="form-input" min="1" max="120" value="1">
             </div>
             <div class="form-group">
                 <label for="edit_income_start_date" class="form-label">Date de début</label>
@@ -248,7 +247,7 @@ $user_accounts = fetchAll(
 </div>
 
 <script>
-function openEditIncomeModal(id, name, description, accountId, amount, frequency, startDate, endDate) {
+function openEditIncomeModal(id, name, description, accountId, amount, frequency, intervalMonths, startDate, endDate) {
     document.getElementById('edit_income_id').value = id;
     document.getElementById('edit_income_name').value = name;
     document.getElementById('edit_income_description').value = description;
@@ -265,14 +264,13 @@ function openEditIncomeModal(id, name, description, accountId, amount, frequency
         }
     }
 
-    // Set frequency select
-    var freqSelect = document.getElementById('edit_income_frequency');
-    for (var i = 0; i < freqSelect.options.length; i++) {
-        if (freqSelect.options[i].value === frequency) {
-            freqSelect.selectedIndex = i;
-            break;
-        }
-    }
+    // Durée: interval_months wins; fall back to the legacy ENUM for old rows.
+    var legacy = { mensuel: 1, bimensuel: 2, trimestriel: 3, semestriel: 6, annuel: 12 };
+    var n = (intervalMonths !== null && intervalMonths !== undefined) ? parseInt(intervalMonths, 10) : (legacy[frequency] || 0);
+    var recSelect = document.getElementById('edit_income_recurrence');
+    recSelect.value = (n > 0) ? 'recurrent' : 'ponctuel';
+    document.getElementById('edit_income_interval').value = (n > 0) ? n : 1;
+    toggleInterval(recSelect, 'edit_income_interval_group');
 
     openModal('editIncomeModal');
 }

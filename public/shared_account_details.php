@@ -56,13 +56,13 @@ $page_title = 'Compte partagé';
 include SRC_PATH . '/includes/header.php';
 
 $expenses = fetchAll(
-    "SELECT name, description, amount, frequency, start_date, end_date
+    "SELECT name, description, amount, frequency, interval_months, start_date, end_date
      FROM expenses WHERE account_id = ? AND deleted_at IS NULL ORDER BY created_at DESC",
     [$account_id]
 );
 
 $incomes = fetchAll(
-    "SELECT name, description, amount, frequency, start_date, end_date
+    "SELECT name, description, amount, frequency, interval_months, start_date, end_date
      FROM incomes WHERE account_id = ? AND deleted_at IS NULL ORDER BY created_at DESC",
     [$account_id]
 );
@@ -133,7 +133,7 @@ $incomes = fetchAll(
                         <td><strong><?php echo htmlspecialchars($income['name']); ?></strong></td>
                         <td><?php echo htmlspecialchars($income['description'] ?? ''); ?></td>
                         <td class="text-success"><?php echo formatCurrency($income['amount']); ?></td>
-                        <td><?php echo htmlspecialchars($income['frequency']); ?></td>
+                        <td><?php echo formatFrequency($income['frequency'], $income['interval_months'] ?? null); ?></td>
                         <td><?php echo $income['start_date'] ? formatDate($income['start_date']) : '—'; ?></td>
                         <td><?php echo $income['end_date'] ? formatDate($income['end_date']) : '—'; ?></td>
                     </tr>
@@ -169,7 +169,7 @@ $incomes = fetchAll(
                         <td><strong><?php echo htmlspecialchars($expense['name']); ?></strong></td>
                         <td><?php echo htmlspecialchars($expense['description'] ?? ''); ?></td>
                         <td><?php echo formatCurrency($expense['amount']); ?></td>
-                        <td><?php echo htmlspecialchars($expense['frequency']); ?></td>
+                        <td><?php echo formatFrequency($expense['frequency'], $expense['interval_months'] ?? null); ?></td>
                         <td><?php echo $expense['start_date'] ? formatDate($expense['start_date']) : '—'; ?></td>
                         <td><?php echo $expense['end_date'] ? formatDate($expense['end_date']) : '—'; ?></td>
                     </tr>

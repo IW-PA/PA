@@ -77,12 +77,17 @@ jobs:
             cd /opt/budgie
             git fetch --prune origin main
             git reset --hard origin/main
-            # Bring the DB up and apply the idempotent migration BEFORE (re)building the app,
-            # so new code never queries a column that does not exist yet (no lockout window).
+            # Bring the DB up and apply EVERY migration BEFORE (re)building the app, so new
+            # code never queries a column that does not exist yet (no lockout window).
+            # The migrations are idempotent; --force keeps an already-applied one from
+            # aborting the deploy.
             set -a; . /opt/budgie/.env; set +a
             docker compose -f docker-compose.prod.yml up -d budgie-mysql
             for i in $(seq 1 30); do docker exec budgie_mysql mysqladmin ping -uroot -p"$MYSQL_ROOT_PASSWORD" --silent >/dev/null 2>&1 && break; sleep 2; done
-            docker exec -i budgie_mysql mysql -ubudgie_user -p"$DB_PASS" budgie_db < database/migrations/add_email_verification.sql
+            for m in database/migrations/*.sql; do
+              echo "applying $m"
+              docker exec -i budgie_mysql mysql --force -ubudgie_user -p"$DB_PASS" budgie_db < "$m"
+            done
             docker compose -f docker-compose.prod.yml up -d --build
             docker image prune -f >/dev/null 2>&1 || true
             for i in $(seq 1 12); do

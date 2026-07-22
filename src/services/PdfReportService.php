@@ -207,7 +207,7 @@ class PdfReportService
                 $pdf->Cell(28, 6.5, date('d/m/Y', strtotime($inc['start_date'])), 'LRB', 0, 'L', true);
                 $pdf->Cell(42, 6.5, $pdf->conv(substr($inc['account_name'] ?? 'Non assigné', 0, 24)), 'LRB', 0, 'L', true);
                 $pdf->Cell(60, 6.5, $pdf->conv(substr($inc['name'], 0, 36)), 'LRB', 0, 'L', true);
-                $pdf->Cell(26, 6.5, $pdf->conv(ucfirst($inc['frequency'])), 'LRB', 0, 'C', true);
+                $pdf->Cell(26, 6.5, $pdf->conv(formatFrequency($inc['frequency'], $inc['interval_months'] ?? null)), 'LRB', 0, 'C', true);
                 $pdf->Cell(30, 6.5, $pdf->conv(number_format($inc['amount'], 2, ',', ' ') . ' €'), 'LRB', 1, 'R', true);
                 $fill = !$fill;
             }
@@ -243,7 +243,7 @@ class PdfReportService
                 $pdf->Cell(28, 6.5, date('d/m/Y', strtotime($exp['start_date'])), 'LRB', 0, 'L', true);
                 $pdf->Cell(42, 6.5, $pdf->conv(substr($exp['account_name'] ?? 'Non assigné', 0, 24)), 'LRB', 0, 'L', true);
                 $pdf->Cell(60, 6.5, $pdf->conv(substr($exp['name'], 0, 36)), 'LRB', 0, 'L', true);
-                $pdf->Cell(26, 6.5, $pdf->conv(ucfirst($exp['frequency'])), 'LRB', 0, 'C', true);
+                $pdf->Cell(26, 6.5, $pdf->conv(formatFrequency($exp['frequency'], $exp['interval_months'] ?? null)), 'LRB', 0, 'C', true);
                 $pdf->Cell(30, 6.5, $pdf->conv(number_format($exp['amount'], 2, ',', ' ') . ' €'), 'LRB', 1, 'R', true);
                 $fill = !$fill;
             }

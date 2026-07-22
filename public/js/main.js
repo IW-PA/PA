@@ -29,6 +29,14 @@ function initModals() {
     });
 }
 
+// Show the "tous les N mois" field only when a recurring duration is selected.
+function toggleInterval(select, groupId) {
+    var group = document.getElementById(groupId);
+    if (group) {
+        group.style.display = (select.value === 'recurrent') ? '' : 'none';
+    }
+}
+
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {

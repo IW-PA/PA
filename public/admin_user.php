@@ -85,7 +85,7 @@ include SRC_PATH . '/includes/header.php';
                             <td><?php echo htmlspecialchars($e['name']); ?></td>
                             <td><?php echo htmlspecialchars($e['account_name']); ?></td>
                             <td><?php echo formatCurrency($e['amount']); ?></td>
-                            <td><?php echo htmlspecialchars($e['frequency']); ?></td>
+                            <td><?php echo formatFrequency($e['frequency'], $e['interval_months'] ?? null); ?></td>
                             <td><?php echo htmlspecialchars($e['start_date']); ?></td>
                             <td><?php echo $e['end_date'] ? htmlspecialchars($e['end_date']) : '—'; ?></td>
                         </tr>
@@ -111,7 +111,7 @@ include SRC_PATH . '/includes/header.php';
                             <td><?php echo htmlspecialchars($i['name']); ?></td>
                             <td><?php echo htmlspecialchars($i['account_name']); ?></td>
                             <td><?php echo formatCurrency($i['amount']); ?></td>
-                            <td><?php echo htmlspecialchars($i['frequency']); ?></td>
+                            <td><?php echo formatFrequency($i['frequency'], $i['interval_months'] ?? null); ?></td>
                             <td><?php echo htmlspecialchars($i['start_date']); ?></td>
                             <td><?php echo $i['end_date'] ? htmlspecialchars($i['end_date']) : '—'; ?></td>
                         </tr>

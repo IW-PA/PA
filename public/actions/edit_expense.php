@@ -19,7 +19,17 @@ $name = trim($_POST['name'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $account_id = intval($_POST['account_id'] ?? 0);
 $amount = floatval($_POST['amount'] ?? 0);
-$frequency = trim($_POST['frequency'] ?? '');
+// Durée: "Ponctuelle" or "Tous les N mois" with an arbitrary N. interval_months is
+// the source of truth; frequency keeps a valid ENUM value for legacy readers.
+$recurrence = is_string($_POST['recurrence'] ?? null) ? trim($_POST['recurrence']) : '';
+$rawInterval = $_POST['interval_months'] ?? null;
+$isRecurring = ($recurrence === 'recurrent');
+$intervalMonths = null;
+$frequency = 'ponctuel';
+if ($isRecurring) {
+    $frequency = 'recurrent';
+    $intervalMonths = (is_scalar($rawInterval) && ctype_digit((string) $rawInterval)) ? (int) $rawInterval : 0;
+}
 $start_date = $_POST['start_date'] ?? '';
 $end_date = $_POST['end_date'] ?? '';
 
@@ -37,8 +47,10 @@ if ($account_id <= 0) {
 if ($amount <= 0) {
     $errors[] = 'Le montant doit être supérieur à 0.';
 }
-if (empty($frequency)) {
-    $errors[] = 'Veuillez sélectionner une fréquence.';
+if ($recurrence !== 'ponctuel' && $recurrence !== 'recurrent') {
+    $errors[] = 'Veuillez sélectionner une durée.';
+} elseif ($isRecurring && ($intervalMonths < 1 || $intervalMonths > 120)) {
+    $errors[] = 'Le nombre de mois doit être un entier compris entre 1 et 120.';
 }
 if (empty($start_date)) {
     $errors[] = 'La date de début est requise.';
@@ -89,6 +101,7 @@ try {
             'description' => $description,
             'amount'      => $amount,
             'frequency'   => $frequency,
+            'interval_months' => $intervalMonths,
             'start_date'  => $start_date,
             'end_date'    => !empty($end_date) ? $end_date : null,
         ],
