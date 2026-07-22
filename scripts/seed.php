@@ -12,6 +12,15 @@
  *   --count=N     number of regular users to create (default 8)
  */
 
+// Maintenance tooling: refuse to run over HTTP. This file sits inside the web
+// root (the Dockerfile copies the whole project), so without this guard anyone
+// could hit /scripts/seed.php and write rows into the live database. Apache
+// also denies /scripts, but the guard belongs in the script itself.
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
+
 require __DIR__ . '/../src/config/config.php';
 error_reporting(E_ALL);
 ini_set('display_errors', '1');

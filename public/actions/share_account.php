@@ -14,7 +14,9 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
 }
 
 $account_id  = intval($_POST['account_id'] ?? 0);
-$share_email = strtolower(trim($_POST['email'] ?? ''));
+// Guard the type before trim(): email[] would raise a TypeError outside the
+// try/catch below and surface as a blank 500.
+$share_email = is_string($_POST['email'] ?? null) ? strtolower(trim($_POST['email'])) : '';
 
 if ($account_id <= 0 || empty($share_email) || !filter_var($share_email, FILTER_VALIDATE_EMAIL)) {
     setFlashMessage('error', 'Veuillez remplir correctement tous les champs.');

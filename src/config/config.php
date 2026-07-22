@@ -74,8 +74,12 @@ if (APP_ENV === 'development') {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
 } else {
-    error_reporting(0);
+    // Report and LOG everything, but never render it to the user. Silencing
+    // error_reporting outright also silenced the logs, which is what made
+    // production failures undiagnosable.
+    error_reporting(E_ALL);
     ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
 }
 
 // Timezone
@@ -83,6 +87,10 @@ date_default_timezone_set('Europe/Paris');
 
 // Include database configuration
 require_once __DIR__ . '/database.php';
+
+// Translation helpers. admin_login.php and change_language.php call these and
+// nothing ever loaded the file, so both pages fataled on every request.
+require_once __DIR__ . '/../helpers/language.php';
 
 // Include CSRF Protection class
 require_once __DIR__ . '/../security/CSRFProtection.php';
@@ -243,7 +251,9 @@ function generateCSRFToken() {
 }
 
 function validateCSRFToken($token) {
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    // is_string() first: a posted csrf_token[] would otherwise reach hash_equals()
+    // as an array and raise an uncaught TypeError in every protected action.
+    return is_string($token) && isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
 // Rate limiting
