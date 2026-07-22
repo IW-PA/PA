@@ -15,7 +15,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Budgie — Ton partenaire financier personnel. Suivez vos dépenses, revenus et faites des prévisions sans connexion bancaire.">
-    <title><?php echo isset($page_title) ? $page_title . ' - ' : ''; ?>Budgie</title>
+    <title><?php echo isset($page_title) ? htmlspecialchars($page_title) . ' - ' : ''; ?>Budgie</title>
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
     <?php
@@ -122,7 +122,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                     <button id="mobileMenuBtn" class="btn btn-secondary mobile-menu-btn" style="margin-right: 0.5rem;" aria-label="Menu">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                     </button>
-                    <h2><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h2>
+                    <h2><?php echo isset($page_title) ? htmlspecialchars($page_title) : 'Dashboard'; ?></h2>
                 </div>
                 <div class="user-menu">
                     <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Basculer le mode sombre" title="Mode sombre">
