@@ -149,6 +149,17 @@ function getCurrentUser() {
     return $user;
 }
 
+/**
+ * Version a static asset with its modification time so that a deploy busts the
+ * browser cache. PHP pages are sent no-store, but css/js carry no Cache-Control
+ * at all, so browsers were free to keep serving a stale copy after a release.
+ */
+function asset($relativePath) {
+    $full = PUBLIC_PATH . '/' . ltrim($relativePath, '/');
+    $version = @filemtime($full);
+    return $relativePath . '?v=' . ($version ?: APP_VERSION);
+}
+
 function formatCurrency($amount) {
     return '€' . number_format($amount, 2, ',', ' ');
 }

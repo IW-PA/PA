@@ -78,7 +78,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/main.js"></script>
-    <script src="js/charts.js"></script>
+    <script src="<?php echo asset('js/main.js'); ?>"></script>
+    <script src="<?php echo asset('js/charts.js'); ?>"></script>
 </body>
 </html>
