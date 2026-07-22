@@ -107,12 +107,15 @@ $recent_shares = fetchAll(
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="openModal('editShareModal', <?php echo $share['id']; ?>)">
+                            <button class="btn btn-sm btn-secondary" onclick="openEditShareModal(<?php echo (int) $share['id']; ?>, <?php echo htmlspecialchars(json_encode($share['access_type']), ENT_QUOTES); ?>)">
                                 Modifier
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="confirmRevokeAccess(<?php echo $share['id']; ?>)">
-                                Révoquer
-                            </button>
+                            <form method="POST" action="actions/revoke_share.php" style="display:inline;"
+                                  onsubmit="return confirmSubmit(event, 'Êtes-vous sûr de vouloir révoquer ce partage ? Le destinataire perdra immédiatement son accès au compte.', 'Révocation du partage', 'Révoquer');">
+                                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                                <input type="hidden" name="share_id" value="<?php echo (int) $share['id']; ?>">
+                                <button type="submit" class="btn btn-sm btn-danger">Révoquer</button>
+                            </form>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -230,7 +233,7 @@ $recent_shares = fetchAll(
         </div>
         <form method="POST" action="actions/edit_share.php">
             <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
-            <input type="hidden" name="share_id" value="">
+            <input type="hidden" id="edit_share_id" name="share_id" value="">
             <div class="form-group">
                 <label for="edit_access_type" class="form-label">Type d'Accès</label>
                 <select id="edit_access_type" name="access_type" class="form-select" required>
@@ -251,31 +254,16 @@ $recent_shares = fetchAll(
 </div>
 
 <script>
-function confirmRevokeAccess(shareId) {
-    showConfirm({
-        title: 'Révoquer l\'accès',
-        message: 'Êtes-vous sûr de vouloir révoquer l\'accès à ce compte ?',
-        confirmText: 'Révoquer',
-        confirmBtnClass: 'btn-danger'
-    }, function() {
-        revokeAccess(shareId);
-    });
+// Carry the share into the edit modal: openModal() only takes the modal id, so
+// the fields have to be filled in before it is opened.
+function openEditShareModal(shareId, accessType) {
+    document.getElementById('edit_share_id').value = shareId;
+    const accessSelect = document.getElementById('edit_access_type');
+    if (accessSelect && accessType) {
+        accessSelect.value = accessType;
+    }
+    openModal('editShareModal');
 }
-
-function revokeAccess(shareId) {
-    console.log('Revoking access for share:', shareId);
-    showAlert({
-        title: 'Accès révoqué',
-        message: 'L\'accès au compte a été révoqué avec succès.',
-        type: 'success'
-    });
-}
-
-// Auto-refresh sharing activity every 30 seconds
-setInterval(function() {
-    // This would fetch new sharing activity
-    console.log('Checking for new sharing activity...');
-}, 30000);
 </script>
 
 <?php include SRC_PATH . '/includes/footer.php'; ?>

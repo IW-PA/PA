@@ -13,11 +13,20 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
     redirect('sharing.php');
 }
 
-$share_id    = intval($_POST['share_id'] ?? 0);
-$access_type = trim($_POST['access_type'] ?? 'read_only');
+$share_id = intval($_POST['share_id'] ?? 0);
+// Guard the type before trim(): access_type[] would raise a TypeError here,
+// outside the try/catch below, and surface as a blank 500.
+$access_type = is_string($_POST['access_type'] ?? null) ? trim($_POST['access_type']) : '';
 
 if ($share_id <= 0) {
     setFlashMessage('error', 'ID de partage invalide.');
+    redirect('sharing.php');
+}
+
+// Whitelist against the ENUM: an unexpected value is rejected by MySQL in
+// strict mode instead of being silently coerced.
+if (!in_array($access_type, ['read_only', 'read_write'], true)) {
+    setFlashMessage('error', "Type d'accès invalide.");
     redirect('sharing.php');
 }
 
