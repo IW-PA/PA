@@ -40,7 +40,7 @@ if (!empty($errors)) {
 try {
     // Check if email is already used by another account
     $existingUser = fetchOne(
-        "SELECT id FROM users WHERE email = ? AND id != ? AND deleted_at IS NULL",
+        "SELECT id FROM users WHERE email = ? AND id != ?",
         [$email, $_SESSION['user_id']]
     );
 

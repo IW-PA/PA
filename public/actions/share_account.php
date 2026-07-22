@@ -33,7 +33,8 @@ try {
         redirect('sharing.php');
     }
 
-    $targetUser = fetchOne("SELECT id FROM users WHERE email = ? AND deleted_at IS NULL", [$share_email]);
+    // users are hard-deleted (AdminService::deleteUser), so there is no deleted_at column on this table
+    $targetUser = fetchOne("SELECT id FROM users WHERE email = ?", [$share_email]);
     $targetUserId = $targetUser ? (int)$targetUser['id'] : null;
 
     $invitationToken = bin2hex(random_bytes(32));
