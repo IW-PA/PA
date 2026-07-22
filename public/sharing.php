@@ -46,6 +46,7 @@ $recent_shares = fetchAll(
             <h3 class="card-title">Partager un Compte</h3>
         </div>
         <form method="POST" action="actions/share_account.php">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <div class="form-group">
                     <label for="share_account" class="form-label">Compte à partager</label>
@@ -228,6 +229,7 @@ $recent_shares = fetchAll(
             <button class="modal-close" onclick="closeModal('editShareModal')">&times;</button>
         </div>
         <form method="POST" action="actions/edit_share.php">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
             <input type="hidden" name="share_id" value="">
             <div class="form-group">
                 <label for="edit_access_type" class="form-label">Type d'Accès</label>
