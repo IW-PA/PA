@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../src/config/config.php';
 require_once SRC_PATH . '/services/ActivityLogger.php';
+require_once SRC_PATH . '/services/ShareInvitationService.php';
 
 requireLogin();
 
@@ -41,8 +42,10 @@ try {
 
     $invitationToken = bin2hex(random_bytes(32));
 
+    // The share stays PENDING until the invited address accepts it from the
+    // emailed link: nobody gets sight of an account without agreeing to it.
     executeQuery(
-        "INSERT INTO account_shares (account_id, owner_id, shared_with_email, shared_with_user_id, status, invitation_token) VALUES (?, ?, ?, ?, 'accepted', ?)",
+        "INSERT INTO account_shares (account_id, owner_id, shared_with_email, shared_with_user_id, status, invitation_token) VALUES (?, ?, ?, ?, 'pending', ?)",
         [$account_id, $_SESSION['user_id'], $share_email, $targetUserId, $invitationToken]
     );
 
@@ -54,7 +57,19 @@ try {
         ['shared_with' => $share_email]
     );
 
-    setFlashMessage('success', 'Invitation de partage créée avec succès !');
+    $ownerName = trim(($_SESSION['user_name'] ?? '') !== '' ? $_SESSION['user_name'] : ($_SESSION['user_email'] ?? 'Un utilisateur'));
+    $sent = ShareInvitationService::send($share_email, $account['name'], $ownerName, $invitationToken);
+
+    // Flash messages are escaped at render time (header.php), so no escaping here.
+    if ($sent) {
+        setFlashMessage('success', 'Invitation envoyée à ' . $share_email . '. Le partage sera actif dès son acceptation.');
+    } elseif (APP_ENV === 'development') {
+        // No SMTP in dev: surface the link so the flow stays testable locally.
+        setFlashMessage('success', 'Invitation créée. [DEV] Aucun SMTP configuré, lien d\'invitation : '
+            . ShareInvitationService::buildLink($invitationToken));
+    } else {
+        setFlashMessage('error', 'Le partage a été créé mais l\'email d\'invitation n\'a pas pu être envoyé.');
+    }
 
 } catch (Exception $e) {
     error_log("Share account error: " . $e->getMessage());

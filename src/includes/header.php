@@ -41,7 +41,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <?php if (!in_array($current_page, ['login', 'signup', 'forgot_password', 'reset_password', 'landing', 'verify_email', 'verify_notice'])): ?>
+    <?php if (!in_array($current_page, ['login', 'signup', 'forgot_password', 'reset_password', 'landing', 'verify_email', 'verify_notice', 'accept_share'])): ?>
     <div class="main-layout">
         <!-- Sidebar -->
         <nav class="sidebar" id="appSidebar">
