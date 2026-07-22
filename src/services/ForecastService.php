@@ -210,7 +210,13 @@ class ForecastService
             );
 
             foreach ($exceptionOccurrences as $month) {
-                $schedule[$month] = (float) $exception['amount'];
+                // An exception REPLACES the amount of an occurrence that already
+                // exists. It must never create a charge in a month where the
+                // dépense/revenu does not run - outside its start/end dates, or
+                // between two occurrences of a coarser frequency.
+                if (array_key_exists($month, $schedule)) {
+                    $schedule[$month] = (float) $exception['amount'];
+                }
             }
         }
 

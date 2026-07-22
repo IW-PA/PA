@@ -59,8 +59,8 @@ if (!empty($start_date) && !empty($end_date) && strtotime($start_date) > strtoti
 }
 
 // Check subscription limits
-if (!checkSubscriptionLimits($_SESSION['user_id'], 'expenses')) {
-    $errors[] = 'Vous avez atteint la limite de dépenses pour votre abonnement gratuit. Passez au Premium pour créer plus de dépenses.';
+if (!checkSubscriptionLimits($_SESSION['user_id'], 'expenses', $account_id)) {
+    $errors[] = 'Vous avez atteint la limite de ' . FREE_EXPENSES_LIMIT . ' dépenses par compte de votre abonnement gratuit. Passez au Premium pour créer plus de dépenses.';
 }
 
 if (!empty($errors)) {

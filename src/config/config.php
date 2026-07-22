@@ -69,6 +69,9 @@ define('FREE_ACCOUNTS_LIMIT', 2);
 define('FREE_EXPENSES_LIMIT', 7);
 define('FREE_INCOMES_LIMIT', 2);
 
+// Frequencies allowed for dépenses, revenus and exceptions (mirrors the SQL ENUM).
+define('ALLOWED_FREQUENCIES', ['ponctuel', 'mensuel', 'bimensuel', 'trimestriel', 'semestriel', 'annuel']);
+
 // Error reporting
 if (APP_ENV === 'development') {
     error_reporting(E_ALL);
@@ -217,26 +220,29 @@ function getFlashMessage($type) {
     return null;
 }
 
-function checkSubscriptionLimits($userId, $type) {
+function checkSubscriptionLimits($userId, $type, $accountId = null) {
     $user = fetchOne("SELECT subscription_type FROM users WHERE id = ?", [$userId]);
-    
+
     if ($user['subscription_type'] === 'premium') {
         return true; // No limits for premium users
     }
-    
+
     switch ($type) {
         case 'accounts':
             $count = fetchOne("SELECT COUNT(*) as count FROM accounts WHERE user_id = ? AND deleted_at IS NULL", [$userId])['count'];
             return $count < FREE_ACCOUNTS_LIMIT;
-            
+
+        // Dépenses and revenus are capped PER ACCOUNT, not per user: the free
+        // plan allows FREE_EXPENSES_LIMIT dépenses and FREE_INCOMES_LIMIT
+        // revenus on each of the user's accounts.
         case 'expenses':
-            $count = fetchOne("SELECT COUNT(*) as count FROM expenses WHERE user_id = ? AND deleted_at IS NULL", [$userId])['count'];
+            $count = fetchOne("SELECT COUNT(*) as count FROM expenses WHERE user_id = ? AND account_id = ? AND deleted_at IS NULL", [$userId, (int) $accountId])['count'];
             return $count < FREE_EXPENSES_LIMIT;
-            
+
         case 'incomes':
-            $count = fetchOne("SELECT COUNT(*) as count FROM incomes WHERE user_id = ? AND deleted_at IS NULL", [$userId])['count'];
+            $count = fetchOne("SELECT COUNT(*) as count FROM incomes WHERE user_id = ? AND account_id = ? AND deleted_at IS NULL", [$userId, (int) $accountId])['count'];
             return $count < FREE_INCOMES_LIMIT;
-            
+
         default:
             return false;
     }

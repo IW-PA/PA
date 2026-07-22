@@ -59,8 +59,8 @@ if (!empty($start_date) && !empty($end_date) && strtotime($start_date) > strtoti
 }
 
 // Check subscription limits
-if (!checkSubscriptionLimits($_SESSION['user_id'], 'incomes')) {
-    $errors[] = 'Vous avez atteint la limite de revenus pour votre abonnement gratuit. Passez au Premium pour créer plus de revenus.';
+if (!checkSubscriptionLimits($_SESSION['user_id'], 'incomes', $account_id)) {
+    $errors[] = 'Vous avez atteint la limite de ' . FREE_INCOMES_LIMIT . ' revenus par compte de votre abonnement gratuit. Passez au Premium pour créer plus de revenus.';
 }
 
 if (!empty($errors)) {
