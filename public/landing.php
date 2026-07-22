@@ -126,6 +126,7 @@ a { text-decoration: none; color: inherit; }
     font-weight: 900; line-height: 1.1;
     letter-spacing: -.03em; color: var(--dark);
     margin-bottom: 1rem;
+    text-wrap: balance;
 }
 .hero-h1 .accent { color: var(--wine); }
 .hero-desc { font-size: 1.1rem; color: var(--muted); line-height: 1.7; max-width: 500px; margin-bottom: 2rem; }
@@ -185,7 +186,7 @@ a { text-decoration: none; color: inherit; }
 .section { padding: 5.5rem 2rem; }
 .section-alt { background: var(--white); }
 .section-head { text-align: center; max-width: 640px; margin: 0 auto 3.5rem; }
-.section-head h2 { font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; letter-spacing: -.025em; color: var(--dark); margin-bottom: .75rem; }
+.section-head h2 { font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; letter-spacing: -.025em; color: var(--dark); margin-bottom: .75rem; text-wrap: balance; }
 .section-head p { font-size: 1.05rem; color: var(--muted); line-height: 1.65; }
 
 /* ── Features ── */
@@ -250,6 +251,7 @@ a { text-decoration: none; color: inherit; }
 .price-card > p { color: var(--muted); font-size: .9rem; margin-bottom: 1.75rem; }
 .price-features { list-style: none; flex: 1; margin-bottom: 2rem; }
 .price-features li { padding: .7rem 0; border-bottom: 1px solid var(--border); font-size: .92rem; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
+.price-features li:last-child { border-bottom: none; }
 .price-check { color: var(--green); flex-shrink: 0; }
 .btn-block { width: 100%; justify-content: center; }
 
@@ -278,8 +280,40 @@ a { text-decoration: none; color: inherit; }
     .features-grid { grid-template-columns: 1fr; }
     .pricing-grid { grid-template-columns: 1fr; }
     .lp-links { display: none; }
-    .security-banner { padding: 2.5rem 1.75rem; }
+    .security-banner { padding: 2.5rem 1.5rem; }
+    .security-banner > div { min-width: 0; }             /* let the text column shrink so long words wrap */
+    .security-banner h2 { font-size: 1.5rem; }           /* stop long FR words overflowing the card at 320px */
     .footer-grid { grid-template-columns: 1fr; }
+
+    /* Navbar: tighten the CTA cluster so it fits on one line without wrapping */
+    .lp-nav-inner { padding: .85rem 1.25rem; }
+    #lpDmText { display: none; }                 /* theme toggle collapses to its icon */
+    .lp-dark-toggle { padding: .45rem .6rem; }
+    .lp-ctas { gap: .5rem; }
+    .lp-ctas .btn { padding: .6rem 1rem; font-size: .85rem; white-space: nowrap; }
+
+    /* Trim the oversized vertical rhythm + give content more width */
+    .container { padding: 0 1.25rem; }
+    .section { padding: 3.5rem 1.25rem; }
+    .hero { padding: 3rem 1.25rem 3.5rem; }
+    .section-head { margin-bottom: 2.5rem; }
+
+    /* Hero: full-width stacked CTAs + stacked proof points */
+    .hero-btns { flex-direction: column; align-items: stretch; }
+    .hero-btns .btn { width: 100%; justify-content: center; }
+    .hero-proof { flex-direction: column; gap: .6rem; }
+}
+
+@media (max-width: 480px) {
+    .lp-logo { font-size: 1.2rem; }
+    .link-btn { display: none; }                 /* "Se connecter" — already offered in the hero */
+    .hero-h1 { font-size: 2.1rem; }
+    .hero-desc { font-size: 1rem; }
+    .security-list { grid-template-columns: 1fr; }
+    .security-badge { min-width: 0; width: 100%; padding: 2rem 1.5rem; }
+    .price-card { padding: 2rem 1.5rem; }
+    .price-amount { font-size: 2.6rem; }
+    .section-head h2 { font-size: 1.7rem; }
 }
 
 /* ── Dark Mode ── */
@@ -294,6 +328,9 @@ a { text-decoration: none; color: inherit; }
     --green:  #50fa7b;
 }
 [data-theme="dark"] body { background: #1a1a2e; color: #e2e8ff; }
+/* Security banner keeps a genuinely dark gradient in dark mode so its white text stays legible
+   (--dark/--wine flip light in dark mode, which would wash the copy out otherwise). */
+[data-theme="dark"] .security-banner { background: linear-gradient(135deg, #16213e 0%, #8d2b5c 100%); }
 [data-theme="dark"] .lp-nav { background: rgba(22,33,62,.96); border-bottom-color: #30344e; }
 [data-theme="dark"] .lp-links a { color: #9aa5ce; }
 [data-theme="dark"] .lp-links a:hover { color: #f252a1; }
