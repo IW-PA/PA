@@ -509,6 +509,13 @@ img {
     margin-right: 0.5rem;
 }
 
+/* Mobile menu button — hidden on desktop, revealed at <=768px.
+   The default MUST precede the media-query override below: media queries add no
+   specificity, so with equal specificity the later rule wins the cascade tie. */
+.mobile-menu-btn {
+    display: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .mobile-menu-btn { display: flex; }
@@ -642,11 +649,6 @@ img {
         flex-wrap: wrap;
         gap: 0.5rem;
     }
-}
-
-/* Mobile menu button — hidden on desktop, visible on mobile */
-.mobile-menu-btn {
-    display: none;
 }
 
 /* Sidebar overlay on mobile */
